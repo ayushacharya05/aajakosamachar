@@ -11,9 +11,7 @@
     :root {
       --primary-color: #0052D4; --surface-light: #F2F4F7; --card-bg-light: #FFFFFF;
       --text-main-light: #1A1C1E; --surface-dark: #0E1113; --card-bg-dark: #1C1F26;
-      --accent-gold: #FFD700;
     }
-
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     #splashScreen img { width: 180px; animation: logoEntrance 2s ease-in-out forwards; }
     @keyframes logoEntrance { 0% { transform: scale(0.8); opacity: 0; } 20% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
@@ -22,21 +20,8 @@
     .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1040; padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
     .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; }
 
-    #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; }
-    .carousel-item { height: 260px; background: #000; cursor: pointer; }
-    .carousel-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
-    .carousel-caption { 
-        text-align: left; left: 0; right: 0; bottom: 0; 
-        background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
-        padding: 25px 15px 15px 15px; width: 100%; margin: 0;
-    }
-
-    .offcanvas { transition: transform 0.3s ease-in-out; border-right: none !important; width: 280px !important; }
-    .nav-link-custom { padding: 15px 20px; border-radius: 12px; color: inherit; text-decoration: none; display: flex; align-items: center; margin-bottom: 5px; font-weight: 500; }
-    .nav-link-custom i { width: 35px; color: var(--primary-color); font-size: 1.2rem; }
-
-    #categorySection { padding: 20px; display: none; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-    .cat-tile { background: var(--card-bg-light); border-radius: 16px; padding: 25px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
+    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; transition: transform 0.3s ease; }
+    .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; z-index: 2001; }
     
     .news-card { background: var(--card-bg-light); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; margin-bottom: 20px; border: none; }
     .news-card img { width: 100%; height: 210px; object-fit: cover; }
@@ -44,24 +29,13 @@
     .news-title { font-family: 'Mukta', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.4; margin-bottom: 10px; }
     .source-badge { background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
     
+    .dark-mode { background: var(--surface-dark); color: white; }
+    .dark-mode .app-header, .dark-mode #newsReader, .dark-mode .reader-header { background: var(--card-bg-dark) !important; color: white !important; border-color: #333 !important; }
+    .dark-mode .news-card { background: #252830; }
+
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 0 28px 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.08); z-index: 1030; text-align: center; border-radius: 20px 20px 0 0; }
     .nav-item { color: #888; font-size: 0.75rem; cursor: pointer; border: none; background: none; }
-    .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
     .nav-item.active { color: var(--primary-color); font-weight: 700; }
-
-    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; transition: transform 0.3s ease; }
-    .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; z-index: 2001; }
-    
-    .dark-mode { background: var(--surface-dark); color: white; }
-    .dark-mode .app-header, .dark-mode .bottom-nav, .dark-mode #newsReader, .dark-mode .cat-tile, .dark-mode .offcanvas, .dark-mode .reader-header { background: var(--card-bg-dark) !important; color: white !important; border-color: #333 !important; }
-    .dark-mode .btn-close { filter: invert(1); }
-    .dark-mode .news-card { background: #252830; }
-    
-    .save-btn-circle { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
-    .save-btn-circle.saved { background: var(--primary-color); color: white; }
-
-    /* Swipe Hint Visual */
-    .swipe-indicator { position: fixed; left: 0; top: 0; bottom: 0; width: 15px; z-index: 2005; pointer-events: none; }
   </style>
 </head>
 <body onload="initApp()">
@@ -69,174 +43,117 @@
   <div id="splashScreen"><img src="https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/refs/heads/main/images/icon.png" alt="Splash"></div>
 
   <header class="app-header">
-    <div onclick="openMenu()" style="cursor:pointer"><i class="fas fa-bars-staggered fa-lg"></i></div>
+    <div onclick="openMenu()"><i class="fas fa-bars-staggered fa-lg"></i></div>
     <h1 class="brand-name">आजको समाचार</h1>
-    <div onclick="toggleDarkMode()" style="cursor:pointer"><i id="darkModeIcon" class="fas fa-moon fa-lg"></i></div>
+    <div onclick="toggleDarkMode()"><i id="darkModeIcon" class="fas fa-moon fa-lg"></i></div>
   </header>
 
-  <main class="container-fluid p-0">
-    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner" id="carouselContent"></div>
-    </div>
-
-    <div id="categorySection" class="container">
-        <div class="cat-tile" onclick="filterByTopic('All')"><i class="fas fa-th-large mb-2 text-primary fs-2"></i><br><span>सबै</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Politics')"><i class="fas fa-landmark mb-2 text-primary fs-2"></i><br><span>राजनीति</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Sports')"><i class="fas fa-trophy mb-2 text-primary fs-2"></i><br><span>खेलकुद</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Tech')"><i class="fas fa-microchip mb-2 text-primary fs-2"></i><br><span>प्रविधि</span></div>
-    </div>
-    
-    <div id="newsContainer" class="container pt-2"></div>
-  </main>
-
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="brand-name">मेनु</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-      <a href="#" class="nav-link-custom"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
-      <a href="#" class="nav-link-custom"><i class="fas fa-headset"></i> सहयोग र सम्पर्क</a>
-    </div>
-  </div>
+  <main id="newsContainer" class="container pt-3"></main>
 
   <div id="newsReader">
     <div class="reader-header">
-      <button class="btn btn-outline-secondary rounded-circle me-3" onclick="handleBack()"><i class="fas fa-arrow-left"></i></button>
-      <span class="fw-bold flex-grow-1">पढ्नुहोस्</span>
-      <button id="mainSaveBtn" class="save-btn-circle"><i class="far fa-bookmark"></i></button>
+      <button class="btn btn-outline-secondary rounded-circle me-3" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
+      <span class="fw-bold flex-grow-1">समाचार</span>
     </div>
-    <div class="reader-content p-3">
-        </div>
+    <div class="reader-content p-3"></div>
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="showHome()"><i class="fas fa-house"></i>गृह</button>
-    <button class="nav-item" onclick="showCategories()"><i class="fas fa-grid-2"></i>विभागीय</button>
+    <button class="nav-item active"><i class="fas fa-house"></i>गृह</button>
+    <button class="nav-item"><i class="fas fa-grid-2"></i>विभागीय</button>
     <button class="nav-item"><i class="fas fa-bookmark"></i>संग्रह</button>
     <button class="nav-item"><i class="fas fa-gear"></i>सेटिङ</button>
   </nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
   <script>
-    // --- APP STATE & SWIPE LOGIC ---
     let startX = 0;
-    const reader = document.getElementById('newsReader');
 
-    // Swipe Back Detector
-    document.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
-    });
+    // --- 1. POPSTATE (Device Back Button Logic) ---
+    window.onpopstate = function(event) {
+        // If user clicks back button, hide the reader
+        closeReaderUI();
+    };
 
+    function closeReaderUI() {
+        document.getElementById('newsReader').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // --- 2. SWIPE TO BACK ---
+    document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
     document.addEventListener('touchend', e => {
-      let endX = e.changedTouches[0].clientX;
-      let diffX = endX - startX;
-      
-      // If user swipes right (diffX > 100) and reader is visible
-      if (diffX > 100 && reader.style.display === 'block') {
-        handleBack();
-      }
+        let diffX = e.changedTouches[0].clientX - startX;
+        // Swipe right > 100px and reader is open
+        if (diffX > 100 && document.getElementById('newsReader').style.display === 'block') {
+            window.history.back(); // Use history back to trigger popstate logic
+        }
     });
 
-    // --- NEPALI TEXT FORMATTER ---
+    // --- 3. NEPALI TRUNCATION LOGIC (Stop at 2nd ।) ---
     function formatNepaliContent(text) {
-      if (!text) return "";
-      
-      // Find the first "।"
-      let firstStop = text.indexOf('।');
-      if (firstStop === -1) return text;
-
-      // Find the second "।" starting from after the first one
-      let secondStop = text.indexOf('।', firstStop + 1);
-      
-      if (secondStop !== -1) {
-        // Return text only up to the second full stop
-        return text.substring(0, secondStop + 1);
-      }
-      return text;
+        if (!text) return "";
+        let firstIndex = text.indexOf('।');
+        if (firstIndex === -1) return text;
+        let secondIndex = text.indexOf('।', firstIndex + 1);
+        return (secondIndex !== -1) ? text.substring(0, secondIndex + 1) : text;
     }
 
-    // --- CORE FUNCTIONS ---
-    function initApp() {
-      setTimeout(() => {
-        document.getElementById('splashScreen').style.display = 'none';
-        loadDemoNews();
-      }, 2000);
-    }
-
-    function handleBack() {
-      reader.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }
-
+    // --- 4. OPEN READER ---
     function openNewsReader(title, image, content, source) {
-      const formattedBody = formatNepaliContent(content);
-      const container = reader.querySelector('.reader-content');
-      
-      container.innerHTML = `
-        <img src="${image}" class="img-fluid rounded-4 mb-3" style="width:100%; height:250px; object-fit:cover;">
-        <h2 class="news-title fs-3 mb-3">${title}</h2>
-        <span class="source-badge mb-3 d-inline-block">${source}</span>
-        <div class="news-body mt-2" style="font-family: 'Mukta', sans-serif; font-size: 1.2rem; line-height: 1.8;">
-          ${formattedBody}
-        </div>
-        <p class="text-muted mt-4 small"><em>बाँकी समाचार आधिकारिक वेबसाइटमा उपलब्ध छ।</em></p>
-      `;
-      
-      reader.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-      reader.scrollTo(0, 0);
+        const reader = document.getElementById('newsReader');
+        const formattedBody = formatNepaliContent(content);
+        
+        reader.querySelector('.reader-content').innerHTML = `
+            <img src="${image}" class="img-fluid rounded-4 mb-3" style="width:100%; height:250px; object-fit:cover;">
+            <h2 class="news-title fs-3 mb-3">${title}</h2>
+            <span class="source-badge mb-3 d-inline-block">${source}</span>
+            <div class="news-body mt-2" style="font-family: 'Mukta', sans-serif; font-size: 1.2rem; line-height: 1.8;">
+              ${formattedBody}
+            </div>
+            <p class="text-muted mt-4 small"><em>बाँकी समाचार आधिकारिक स्रोतमा...</em></p>
+        `;
+
+        // Push a state so the back button works
+        history.pushState({view: 'reader'}, title, "#reader");
+        
+        reader.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        reader.scrollTo(0, 0);
     }
 
-    function loadDemoNews() {
-      const container = document.getElementById('newsContainer');
-      const demoData = [
-        {
-          title: "नेपालको नयाँ आर्थिक नीति सार्वजनिक",
-          img: "https://picsum.photos/800/400?1",
-          source: "कान्तिपुर",
-          content: "सरकारले आज नयाँ आर्थिक नीति सार्वजनिक गरेको छ। यस नीतिले साना व्यवसायीलाई राहत दिने लक्ष्य राखेको छ। आगामी वर्षको बजेटमा यसलाई थप व्याख्या गरिनेछ। धेरै मानिसहरू यसको पर्खाइमा थिए।"
-        }
-      ];
+    // --- INITIALIZATION & DEMO ---
+    function initApp() {
+        setTimeout(() => {
+            document.getElementById('splashScreen').style.display = 'none';
+            renderDemo();
+        }, 1500);
+    }
 
-      demoData.forEach(item => {
+    function renderDemo() {
+        const container = document.getElementById('newsContainer');
+        const item = {
+            title: "काठमाडौँमा नयाँ पार्क उद्घाटन",
+            img: "https://picsum.photos/500/300",
+            source: "हाम्रो समाचार",
+            content: "काठमाडौँ महानगरपालिकाले आज नयाँ पार्कको उद्घाटन गरेको छ। यो पार्क बालबालिकाका लागि धेरै उपयोगी हुनेछ। यसमा विभिन्न खेलौनाहरू राखिएका छन्। स्थानीय बासिन्दाहरू धेरै खुसी छन्।"
+        };
+        
         const card = document.createElement('div');
         card.className = 'news-card';
         card.onclick = () => openNewsReader(item.title, item.img, item.content, item.source);
         card.innerHTML = `
-          <img src="${item.img}">
-          <div class="card-content">
-            <span class="source-badge">${item.source}</span>
-            <div class="news-title mt-2">${item.title}</div>
-          </div>
+            <img src="${item.img}">
+            <div class="card-content">
+                <span class="source-badge">${item.source}</span>
+                <div class="news-title mt-2">${item.title}</div>
+            </div>
         `;
         container.appendChild(card);
-      });
     }
 
     function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-      const icon = document.getElementById('darkModeIcon');
-      icon.classList.toggle('fa-moon');
-      icon.classList.toggle('fa-sun');
-    }
-
-    function openMenu() {
-        new bootstrap.Offcanvas(document.getElementById('sidebarMenu')).show();
-    }
-
-    function showCategories() {
-        document.getElementById('categorySection').style.display = 'grid';
-        document.getElementById('newsContainer').style.display = 'none';
-        document.getElementById('newsCarousel').style.display = 'none';
-    }
-
-    function showHome() {
-        document.getElementById('categorySection').style.display = 'none';
-        document.getElementById('newsContainer').style.display = 'block';
+        document.body.classList.toggle('dark-mode');
     }
   </script>
 </body>
 </html>
-
