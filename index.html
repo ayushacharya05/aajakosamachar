@@ -1,137 +1,116 @@
-
 <!DOCTYPE html>
 <html lang="ne">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>आजको समाचार</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>आजको समाचार | PC Full Edition</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     :root {
-      --primary-color: #0052D4; --surface-light: #F2F4F7; --card-bg-light: #FFFFFF;
-      --text-main-light: #1A1C1E; --surface-dark: #0E1113; --card-bg-dark: #1C1F26;
-      --accent-gold: #FFD700;
+      --primary-color: #0052D4;
+      --surface-light: #F2F4F7;
+      --sidebar-bg: #FFFFFF;
+      --text-main: #1A1C1E;
+      --brand-black: #000000;
     }
 
-    #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    #splashScreen img { width: 180px; animation: logoEntrance 2s ease-in-out forwards; }
-    @keyframes logoEntrance { 0% { transform: scale(0.8); opacity: 0; } 20% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
-    
-    body { background: var(--surface-light); font-family: 'Outfit', sans-serif; color: var(--text-main-light); padding-bottom: 90px; transition: background 0.3s; overflow-x: hidden; }
-    .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1040; padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
-    .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; }
+    body { background: var(--surface-light); font-family: 'Outfit', sans-serif; margin: 0; display: flex; overflow: hidden; height: 100vh; }
 
-    /* --- CAROUSEL STYLING --- */
-    #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; }
-    .carousel-item { height: 260px; background: #000; cursor: pointer; }
-    .carousel-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
-    .carousel-caption { 
-        text-align: left; left: 0; right: 0; bottom: 0; 
-        background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
-        padding: 25px 15px 15px 15px; width: 100%; margin: 0;
-    }
-    .carousel-caption h5 { font-family: 'Mukta'; font-weight: 700; font-size: 1.15rem; margin-bottom: 5px; line-height: 1.3; color: #fff; }
+    /* --- SIDEBAR --- */
+    .pc-sidebar { width: 280px; height: 100vh; background: var(--sidebar-bg); border-right: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; z-index: 1000; overflow-y: auto; }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 10; }
+    .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--brand-black); margin: 0; text-decoration: none; }
+    
+    .menu-label { padding: 20px 20px 5px 20px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 700; }
+    .nav-link-custom { padding: 12px 20px; color: var(--text-main); text-decoration: none; display: flex; align-items: center; font-weight: 500; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; }
+    .nav-link-custom:hover, .nav-link-custom.active { background: #f0f4ff; color: var(--primary-color); border-left-color: var(--primary-color); }
+    .nav-link-custom i { width: 30px; font-size: 1.1rem; }
 
-    /* --- SIDE MENU --- */
-    .offcanvas { transition: transform 0.3s ease-in-out; border-right: none !important; width: 280px !important; }
-    .nav-link-custom { padding: 15px 20px; border-radius: 12px; color: inherit; text-decoration: none; display: flex; align-items: center; margin-bottom: 5px; font-weight: 500; }
-    .nav-link-custom i { width: 35px; color: var(--primary-color); font-size: 1.2rem; }
+    /* --- MAIN CONTENT --- */
+    .main-wrapper { flex-grow: 1; height: 100vh; overflow-y: auto; padding: 40px; scroll-behavior: smooth; }
+    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
 
-    #categorySection { padding: 20px; display: none; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-    .cat-tile { background: var(--card-bg-light); border-radius: 16px; padding: 25px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
-    
-    .news-card { background: var(--card-bg-light); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; margin-bottom: 20px; border: none; }
-    .news-card img { width: 100%; height: 210px; object-fit: cover; }
-    .card-content { padding: 16px; }
-    .news-title { font-family: 'Mukta', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.4; margin-bottom: 10px; }
-    .source-badge { background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-    
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 0 28px 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.08); z-index: 1030; text-align: center; border-radius: 20px 20px 0 0; }
-    .nav-item { color: #888; font-size: 0.75rem; cursor: pointer; border: none; background: none; }
-    .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-    .nav-item.active { color: var(--primary-color); font-weight: 700; }
+    .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; border: none; display: flex; flex-direction: column; transition: 0.3s; height: 100%; }
+    .news-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+    .card-img-container { width: 100%; height: 190px; overflow: hidden; }
+    .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
+    .card-content { padding: 20px; flex-grow: 1; }
+    .news-title { font-family: 'Mukta', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.4; color: #222; }
+    .source-badge { background: var(--primary-color); color: white; padding: 2px 10px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
 
-    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; }
-    .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; z-index: 2001; }
+    /* --- CENTERED READER MODAL --- */
+    .reader-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .reader-modal-overlay.active { display: flex; }
     
-    .dark-mode { background: var(--surface-dark); color: white; }
-    .dark-mode .app-header, .dark-mode .bottom-nav, .dark-mode #newsReader, .dark-mode .cat-tile, .dark-mode .offcanvas, .dark-mode .reader-header { background: var(--card-bg-dark) !important; color: white !important; border-color: #333 !important; }
-    .dark-mode .btn-close { filter: invert(1); }
-    .dark-mode .news-card { background: #252830; }
+    .reader-container { background: white; width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; position: relative; animation: slideUp 0.25s ease-out; }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .reader-header { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; background: white; }
+    .reader-scroll-area { padding: 30px; overflow-y: auto; }
+    .reader-body { font-size: 1.2rem; line-height: 1.8; font-family: 'Mukta'; color: #333; }
     
-    .save-btn-circle { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
+    .close-btn, .save-btn-circle { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
     .save-btn-circle.saved { background: var(--primary-color); color: white; }
+    .close-btn:hover { background: #e0e0e0; }
   </style>
 </head>
 <body onload="initApp()">
 
-  <div id="splashScreen"><img src="https://raw.githubusercontent.com/ayushacharya05/portfolio-/refs/heads/main/Apps/aajakosamachar/images/icon.png" alt="Splash"></div>
-
-  <header class="app-header">
-    <div onclick="openMenu()" style="cursor:pointer"><i class="fas fa-bars-staggered fa-lg"></i></div>
-    <h1 class="brand-name">आजको समाचार</h1>
-    <div onclick="toggleDarkMode()" style="cursor:pointer"><i id="darkModeIcon" class="fas fa-moon fa-lg"></i></div>
-  </header>
-
-  <main class="container-fluid p-0">
-    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner" id="carouselContent"></div>
-    </div>
-
-    <div id="categorySection" class="container">
-        <div class="cat-tile" onclick="filterByTopic('All')"><i class="fas fa-th-large mb-2 text-primary fs-2"></i><br><span>सबै</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Politics')"><i class="fas fa-landmark mb-2 text-primary fs-2"></i><br><span>राजनीति</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Sports')"><i class="fas fa-trophy mb-2 text-primary fs-2"></i><br><span>खेलकुद</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Tech')"><i class="fas fa-microchip mb-2 text-primary fs-2"></i><br><span>प्रविधि</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Entertainment')"><i class="fas fa-film mb-2 text-primary fs-2"></i><br><span>मनोरञ्जन</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Economy')"><i class="fas fa-chart-line mb-2 text-primary fs-2"></i><br><span>अर्थतन्त्र</span></div>
+  <aside class="pc-sidebar">
+    <div class="sidebar-header">
+      <h1 class="brand-name">आजको समाचार</h1>
     </div>
     
-    <div id="newsContainer" class="container pt-2"></div>
+    <div class="menu-label">मुख्य</div>
+    <a class="nav-link-custom active" onclick="renderByFilter('All', this)"><i class="fas fa-home"></i> होम पेज</a>
+    <a class="nav-link-custom" onclick="renderByFilter('Taaja', this)"><i class="fas fa-bolt"></i> ताजा समाचार</a>
+    <a class="nav-link-custom" onclick="renderSaved(this)"><i class="fas fa-bookmark"></i> सेभ गरिएको</a>
+    
+    <div class="menu-label">विधाहरू</div>
+    <a class="nav-link-custom" onclick="renderByFilter('Politics', this)"><i class="fas fa-landmark"></i> राजनीति</a>
+    <a class="nav-link-custom" onclick="renderByFilter('Sports', this)"><i class="fas fa-trophy"></i> खेलकुद</a>
+    <a class="nav-link-custom" onclick="renderByFilter('Tech', this)"><i class="fas fa-microchip"></i> प्रविधि</a>
+    <a class="nav-link-custom" onclick="renderByFilter('Economy', this)"><i class="fas fa-chart-line"></i> अर्थतन्त्र</a>
+    <a class="nav-link-custom" onclick="renderByFilter('Entertainment', this)"><i class="fas fa-film"></i> मनोरञ्जन</a>
+
+    <div class="mt-auto p-4">
+        <small class="text-muted">© 2026 आजको समाचार</small>
+    </div>
+  </aside>
+
+  <main class="main-wrapper">
+    <h2 id="viewTitle" class="fw-bold mb-4" style="font-family:'Mukta'">मुख्य समाचार</h2>
+    <div id="newsContainer" class="news-grid">
+        <div class="text-center w-100 p-5">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-3">१५ वटा स्रोतबाट समाचार लोड हुँदैछ...</p>
+        </div>
+    </div>
   </main>
 
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="brand-name">मेनु</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-      <a href="https://ayushacharya5.com.np/Apps/aajakosamachar/about.html" class="nav-link-custom"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
-      <a href="https://ayushacharya5.com.np/Apps/aajakosamachar/support.html" class="nav-link-custom"><i class="fas fa-headset"></i> सहयोग र सम्पर्क</a>
-    </div>
-  </div>
-
-  <div id="newsReader">
-    <div class="reader-header">
-      <button class="btn btn-outline-secondary rounded-circle me-3" onclick="handleBack()"><i class="fas fa-arrow-left"></i></button>
-      <span class="fw-bold flex-grow-1">पढ्नुहोस्</span>
-      <button id="mainSaveBtn" class="save-btn-circle" onclick="toggleSaveCurrent()"><i class="far fa-bookmark"></i></button>
-    </div>
-    <div class="reader-content p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-          <div id="rSourceBadge" class="source-badge"></div>
-          <div id="rDate" class="post-date" style="font-family:'Mukta';"></div>
+  <div id="readerOverlay" class="reader-modal-overlay" onclick="closeReader(event)">
+    <div class="reader-container" onclick="event.stopPropagation()">
+      <div class="reader-header">
+        <button class="close-btn" onclick="closeReader()"><i class="fas fa-times"></i></button>
+        <h5 class="mb-0 fw-bold" style="font-family:'Mukta'">विवरण</h5>
+        <button id="saveIconBtn" class="save-btn-circle" onclick="toggleSaveCurrent()"><i class="far fa-bookmark"></i></button>
       </div>
-      <h1 id="rTitle" class="fw-bold mb-3" style="font-family:'Mukta'"></h1>
-      <img id="rImg" class="w-100 rounded mb-3" src="" style="display:none">
-      <div id="rBody"></div>
-      <a id="rLink" href="" target="_blank" class="btn btn-primary w-100 mt-4 py-3 rounded-pill">पूरा पढ्नुहोस्</a>
+      <div class="reader-scroll-area">
+        <div id="rSource" class="source-badge d-inline-block mb-3"></div>
+        <h1 id="rTitle" class="fw-bold mb-4" style="font-family:'Mukta'; line-height: 1.3; color:#000;"></h1>
+        <img id="rImg" class="w-100 rounded-4 mb-4" src="" style="display:none">
+        <div id="rBody" class="reader-body"></div>
+        <a id="rLink" href="" target="_blank" class="btn btn-primary w-100 mt-5 py-3 rounded-pill fw-bold">पूरा समाचार स्रोतमा पढ्नुहोस्</a>
+      </div>
     </div>
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-item active" id="homeTab" onclick="loadNews()"><i class="fas fa-home"></i><span>होम</span></div>
-    <div class="nav-item" id="catTab" onclick="showCategoryMenu()"><i class="fas fa-th-large"></i><span>विधा</span></div>
-    <div class="nav-item" id="tajaTab" onclick="showTaja()"><i class="fas fa-bolt"></i><span>ताजा</span></div>
-    <div class="nav-item" id="saveTab" onclick="renderSaved()"><i class="fas fa-bookmark"></i><span>सेभ</span></div>
-  </nav>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const feeds = [
       { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
+      { name: "OK Entertainment", url: "https://www.onlinekhabar.com/entertainment/feed" },
       { name: "Setopati", url: "https://setopati.com/feed" },
       { name: "Ratopati", url: "https://www.ratopati.com/feed" },
       { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
@@ -148,157 +127,106 @@
     ];
 
     let allNews = [];
-    let currentOpenItem = null;
-    let sidebarInstance = null;
+    let currentItem = null;
 
-    function initApp() {
-      sidebarInstance = new bootstrap.Offcanvas(document.getElementById('sidebarMenu'));
-      setTimeout(() => { document.getElementById('splashScreen').style.display = 'none'; loadNews(); }, 2000);
-    }
-
-    function openMenu() { sidebarInstance.show(); }
-
-    function getImageUrl(item) {
-        const img = item.thumbnail || item.enclosure?.link || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]);
-        if (img && img.startsWith('http') && !img.includes('pixel')) return img;
-        return null; 
-    }
-
-    function openReader(item) {
-      currentOpenItem = item;
-      const img = getImageUrl(item);
-      document.getElementById('rTitle').innerText = item.title;
-      document.getElementById('rSourceBadge').innerText = item.sourceName;
-      document.getElementById('rDate').innerText = new Date(item.pubDate).toLocaleDateString('ne-NP');
-      document.getElementById('rLink').href = item.link;
-      const rImg = document.getElementById('rImg');
-      if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
-      document.getElementById('rBody').innerHTML = item.content || item.description || "सामग्री उपलब्ध छैन।";
-      
-      let saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-      const isSaved = saved.some(n => n.link === item.link);
-      const btn = document.getElementById('mainSaveBtn');
-      btn.className = isSaved ? 'save-btn-circle saved' : 'save-btn-circle';
-      btn.querySelector('i').className = isSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
-      document.getElementById('newsReader').style.display = 'block';
-    }
-
-    function handleBack() { document.getElementById('newsReader').style.display = 'none'; }
-
-    async function loadNews() {
-      setActiveTab('homeTab');
-      toggleView('news');
-      const container = document.getElementById('newsContainer');
-      container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
-      
+    async function initApp() {
       try {
-        const results = await Promise.all(feeds.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json()).then(data => (data.items || []).map(item => ({...item, sourceName: f.name, topic: getTopic(item.title)}))).catch(() => [])));
+        const results = await Promise.all(feeds.map(f => 
+          fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`)
+          .then(res => res.json())
+          .then(data => (data.items || []).map(item => ({
+            ...item, 
+            sourceName: f.name,
+            topic: getTopic(item.title + (item.description || "") + (item.categories ? item.categories.join(' ') : '')) 
+          })))
+          .catch(() => [])
+        ));
         allNews = results.flat().sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-        
-        // --- Carousel Logic (Home Tab Only) ---
-        const newsWithImages = allNews.filter(item => getImageUrl(item) !== null);
-        const carouselItems = newsWithImages.slice(0, 5);
-        
-        const carouselInner = document.getElementById('carouselContent');
-        const carouselContainer = document.getElementById('newsCarousel');
-
-        if (carouselItems.length > 0) {
-            carouselContainer.style.display = 'block';
-            carouselInner.innerHTML = carouselItems.map((item, idx) => `
-                <div class="carousel-item ${idx === 0 ? 'active' : ''}" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                    <img src="${getImageUrl(item)}">
-                    <div class="carousel-caption">
-                        <span class="badge bg-primary mb-2">${item.sourceName}</span>
-                        <h5>${item.title}</h5>
-                    </div>
-                </div>
-            `).join('');
-            
-            const carouselLinks = carouselItems.map(c => c.link);
-            const listItems = allNews.filter(n => !carouselLinks.includes(n.link));
-            renderList(listItems);
-        } else {
-            carouselContainer.style.display = 'none';
-            renderList(allNews);
-        }
-      } catch (e) { container.innerHTML = "Error loading feeds."; }
-    }
-
-    // --- NEW: Taja Function (No Carousel) ---
-    function showTaja() {
-        setActiveTab('tajaTab');
-        toggleView('news');
-        document.getElementById('newsCarousel').style.display = 'none'; // Hide Carousel specifically
-        renderList(allNews); // Show full list including those usually in carousel
+        renderList(allNews);
+      } catch (e) {
+        document.getElementById('newsContainer').innerHTML = "<p class='p-5 text-center'>समाचार लोड गर्न सकिएन।</p>";
+      }
     }
 
     function getTopic(text) {
-      if (text.includes('खेल')) return 'Sports';
-      if (text.includes('राजनीति')) return 'Politics';
-      if (text.includes('प्रविधि')) return 'Tech';
-      if (text.includes('अर्थ')) return 'Economy';
+      if (/खेल|क्रिकेट|फुटबल|मैदान|ओलम्पिक|विश्वकप/.test(text)) return 'Sports';
+      if (/राजनीति|निर्वाचन|सरकार|मन्त्री|नेता|संसद|कांग्रेस|एमाले|माओवादी/.test(text)) return 'Politics';
+      if (/प्रविधि|मोबाइल|इन्टरनेट|एआई|सफ्टवेयर|डिजिटल|टेक/.test(text)) return 'Tech';
+      if (/अर्थ|शेयर|बजेट|बैंक|लगानी|ऋण|नेप्से|बीमा/.test(text)) return 'Economy';
+      if (/फिल्म|मनोरञ्जन|कलाकार|गीत|भिडियो|सिनेमा|कला/.test(text)) return 'Entertainment';
       return 'General';
     }
 
     function renderList(list) {
       const container = document.getElementById('newsContainer');
-      container.innerHTML = '';
+      container.innerHTML = list.length ? '' : '<p class="p-5 text-center">कुनै समाचार भेटिएन।</p>';
       list.forEach(item => {
-        const img = getImageUrl(item);
-        const div = document.createElement('div');
-        div.className = 'news-card';
-        div.onclick = () => openReader(item);
-        div.innerHTML = `
-          ${img ? `<img src="${img}">` : ''}
+        const img = item.thumbnail || (item.enclosure && item.enclosure.link) || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]);
+        const hasImage = img && img.startsWith('http') && !img.includes('pixel');
+
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        card.onclick = () => openReader(item);
+        card.innerHTML = `
+          ${hasImage ? `<div class="card-img-container"><img src="${img}" loading="lazy"></div>` : ''}
           <div class="card-content">
-            <div class="card-meta d-flex justify-content-between mb-2">
-              <span class="source-badge">${item.sourceName}</span>
-              <span style="font-family:'Mukta'; font-size:0.75rem">${new Date(item.pubDate).toLocaleDateString('ne-NP')}</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="source-badge">${item.sourceName}</span>
+                <small class="text-muted"><i class="far fa-clock me-1"></i>${new Date(item.pubDate).toLocaleDateString('ne-NP')}</small>
             </div>
             <div class="news-title">${item.title}</div>
-          </div>`;
-        container.appendChild(div);
+          </div>
+        `;
+        container.appendChild(card);
       });
     }
 
-    function toggleView(view) {
-        document.getElementById('categorySection').style.display = (view === 'category') ? 'grid' : 'none';
-        document.getElementById('newsContainer').style.display = (view === 'news') ? 'block' : 'none';
-        document.getElementById('newsCarousel').style.display = (view === 'news') ? 'block' : 'none';
+    function renderByFilter(filter, el) {
+      document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('viewTitle').innerText = (filter === 'All' ? 'मुख्य समाचार' : (filter === 'Taaja' ? 'ताजा समाचार' : filter));
+      let filtered = (filter === 'Taaja') ? allNews.slice(0, 25) : (filter === 'All' ? allNews : allNews.filter(n => n.topic === filter));
+      renderList(filtered);
+      document.querySelector('.main-wrapper').scrollTop = 0;
     }
 
-    function showCategoryMenu() { setActiveTab('catTab'); toggleView('category'); }
-    
-    function filterByTopic(topic) { 
-        toggleView('news'); 
-        const filtered = topic === 'All' ? allNews : allNews.filter(n => n.topic === topic);
-        document.getElementById('newsCarousel').style.display = 'none'; // Hide carousel on category filter
-        renderList(filtered);
+    function renderSaved(el) {
+      document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('viewTitle').innerText = "सेभ गरिएको समाचार";
+      renderList(JSON.parse(localStorage.getItem('pcSavedNews') || '[]'));
     }
 
-    function setActiveTab(id) {
-         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-         document.getElementById(id).classList.add('active');
+    function openReader(item) {
+      currentItem = item;
+      document.getElementById('rTitle').innerText = item.title;
+      document.getElementById('rSource').innerText = item.sourceName;
+      document.getElementById('rBody').innerHTML = item.content || item.description || "विवरण उपलब्ध छैन।";
+      document.getElementById('rLink').href = item.link;
+      const img = item.thumbnail || (item.enclosure && item.enclosure.link);
+      const rImg = document.getElementById('rImg');
+      if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
+      updateSaveBtn();
+      document.getElementById('readerOverlay').classList.add('active');
     }
 
-    function toggleDarkMode() {
-         document.body.classList.toggle('dark-mode');
-         document.getElementById('darkModeIcon').className = document.body.classList.contains('dark-mode') ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg';
-    }
-
-    function renderSaved() { setActiveTab('saveTab'); toggleView('news'); document.getElementById('newsCarousel').style.display = 'none'; const saved = JSON.parse(localStorage.getItem('savedNews') || '[]'); renderList(saved); }
-    
     function toggleSaveCurrent() {
-        let saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-        const index = saved.findIndex(n => n.link === currentOpenItem.link);
-        const btn = document.getElementById('mainSaveBtn');
-        if (index > -1) {
-            saved.splice(index, 1); btn.classList.remove('saved'); btn.querySelector('i').className = 'far fa-bookmark';
-        } else {
-            saved.push(currentOpenItem); btn.classList.add('saved'); btn.querySelector('i').className = 'fas fa-bookmark';
-        }
-        localStorage.setItem('savedNews', JSON.stringify(saved));
+      let saved = JSON.parse(localStorage.getItem('pcSavedNews') || '[]');
+      const idx = saved.findIndex(s => s.link === currentItem.link);
+      if (idx > -1) saved.splice(idx, 1); else saved.push(currentItem);
+      localStorage.setItem('pcSavedNews', JSON.stringify(saved));
+      updateSaveBtn();
     }
+
+    function updateSaveBtn() {
+      const saved = JSON.parse(localStorage.getItem('pcSavedNews') || '[]');
+      const isSaved = saved.some(s => s.link === currentItem.link);
+      const sBtn = document.getElementById('saveIconBtn');
+      sBtn.className = isSaved ? 'save-btn-circle saved' : 'save-btn-circle';
+      sBtn.innerHTML = isSaved ? '<i class="fas fa-bookmark"></i>' : '<i class="far fa-bookmark"></i>';
+    }
+
+    function closeReader() { document.getElementById('readerOverlay').classList.remove('active'); }
   </script>
 </body>
 </html>
