@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ne">
 <head>
@@ -23,7 +22,6 @@
     .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1040; padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
     .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; }
 
-    /* --- CAROUSEL STYLING --- */
     #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; }
     .carousel-item { height: 260px; background: #000; cursor: pointer; }
     .carousel-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
@@ -32,9 +30,7 @@
         background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
         padding: 25px 15px 15px 15px; width: 100%; margin: 0;
     }
-    .carousel-caption h5 { font-family: 'Mukta'; font-weight: 700; font-size: 1.15rem; margin-bottom: 5px; line-height: 1.3; color: #fff; }
 
-    /* --- SIDE MENU --- */
     .offcanvas { transition: transform 0.3s ease-in-out; border-right: none !important; width: 280px !important; }
     .nav-link-custom { padding: 15px 20px; border-radius: 12px; color: inherit; text-decoration: none; display: flex; align-items: center; margin-bottom: 5px; font-weight: 500; }
     .nav-link-custom i { width: 35px; color: var(--primary-color); font-size: 1.2rem; }
@@ -53,7 +49,7 @@
     .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
     .nav-item.active { color: var(--primary-color); font-weight: 700; }
 
-    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; }
+    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; transition: transform 0.3s ease; }
     .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; z-index: 2001; }
     
     .dark-mode { background: var(--surface-dark); color: white; }
@@ -63,6 +59,9 @@
     
     .save-btn-circle { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
     .save-btn-circle.saved { background: var(--primary-color); color: white; }
+
+    /* Swipe Hint Visual */
+    .swipe-indicator { position: fixed; left: 0; top: 0; bottom: 0; width: 15px; z-index: 2005; pointer-events: none; }
   </style>
 </head>
 <body onload="initApp()">
@@ -85,8 +84,6 @@
         <div class="cat-tile" onclick="filterByTopic('Politics')"><i class="fas fa-landmark mb-2 text-primary fs-2"></i><br><span>राजनीति</span></div>
         <div class="cat-tile" onclick="filterByTopic('Sports')"><i class="fas fa-trophy mb-2 text-primary fs-2"></i><br><span>खेलकुद</span></div>
         <div class="cat-tile" onclick="filterByTopic('Tech')"><i class="fas fa-microchip mb-2 text-primary fs-2"></i><br><span>प्रविधि</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Entertainment')"><i class="fas fa-film mb-2 text-primary fs-2"></i><br><span>मनोरञ्जन</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Economy')"><i class="fas fa-chart-line mb-2 text-primary fs-2"></i><br><span>अर्थतन्त्र</span></div>
     </div>
     
     <div id="newsContainer" class="container pt-2"></div>
@@ -98,8 +95,8 @@
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
-      <a href="https://ayushacharya5.com.np/Apps/aajakosamachar/about.html" class="nav-link-custom"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
-      <a href="https://ayushacharya5.com.np/Apps/aajakosamachar/support.html" class="nav-link-custom"><i class="fas fa-headset"></i> सहयोग र सम्पर्क</a>
+      <a href="#" class="nav-link-custom"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
+      <a href="#" class="nav-link-custom"><i class="fas fa-headset"></i> सहयोग र सम्पर्क</a>
     </div>
   </div>
 
@@ -107,198 +104,139 @@
     <div class="reader-header">
       <button class="btn btn-outline-secondary rounded-circle me-3" onclick="handleBack()"><i class="fas fa-arrow-left"></i></button>
       <span class="fw-bold flex-grow-1">पढ्नुहोस्</span>
-      <button id="mainSaveBtn" class="save-btn-circle" onclick="toggleSaveCurrent()"><i class="far fa-bookmark"></i></button>
+      <button id="mainSaveBtn" class="save-btn-circle"><i class="far fa-bookmark"></i></button>
     </div>
     <div class="reader-content p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-          <div id="rSourceBadge" class="source-badge"></div>
-          <div id="rDate" class="post-date" style="font-family:'Mukta';"></div>
-      </div>
-      <h1 id="rTitle" class="fw-bold mb-3" style="font-family:'Mukta'"></h1>
-      <img id="rImg" class="w-100 rounded mb-3" src="" style="display:none">
-      <div id="rBody"></div>
-      <a id="rLink" href="" target="_blank" class="btn btn-primary w-100 mt-4 py-3 rounded-pill">पूरा पढ्नुहोस्</a>
-    </div>
+        </div>
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-item active" id="homeTab" onclick="loadNews()"><i class="fas fa-home"></i><span>होम</span></div>
-    <div class="nav-item" id="catTab" onclick="showCategoryMenu()"><i class="fas fa-th-large"></i><span>विधा</span></div>
-    <div class="nav-item" id="tajaTab" onclick="showTaja()"><i class="fas fa-bolt"></i><span>ताजा</span></div>
-    <div class="nav-item" id="saveTab" onclick="renderSaved()"><i class="fas fa-bookmark"></i><span>सेभ</span></div>
+    <button class="nav-item active" onclick="showHome()"><i class="fas fa-house"></i>गृह</button>
+    <button class="nav-item" onclick="showCategories()"><i class="fas fa-grid-2"></i>विभागीय</button>
+    <button class="nav-item"><i class="fas fa-bookmark"></i>संग्रह</button>
+    <button class="nav-item"><i class="fas fa-gear"></i>सेटिङ</button>
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
-    const feeds = [
-      { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
-      { name: "Setopati", url: "https://setopati.com/feed" },
-      { name: "Ratopati", url: "https://www.ratopati.com/feed" },
-      { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
-      { name: "TechPana", url: "https://www.techpana.com/feed" },
-      { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
-      { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
-      { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
-      { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
-      { name: "Nepal News", url: "https://nepalnews.com/rss" },
-      { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
-      { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
-      { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
-      { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" }
-    ];
+    // --- APP STATE & SWIPE LOGIC ---
+    let startX = 0;
+    const reader = document.getElementById('newsReader');
 
-    let allNews = [];
-    let currentOpenItem = null;
-    let sidebarInstance = null;
+    // Swipe Back Detector
+    document.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+    });
 
+    document.addEventListener('touchend', e => {
+      let endX = e.changedTouches[0].clientX;
+      let diffX = endX - startX;
+      
+      // If user swipes right (diffX > 100) and reader is visible
+      if (diffX > 100 && reader.style.display === 'block') {
+        handleBack();
+      }
+    });
+
+    // --- NEPALI TEXT FORMATTER ---
+    function formatNepaliContent(text) {
+      if (!text) return "";
+      
+      // Find the first "।"
+      let firstStop = text.indexOf('।');
+      if (firstStop === -1) return text;
+
+      // Find the second "।" starting from after the first one
+      let secondStop = text.indexOf('।', firstStop + 1);
+      
+      if (secondStop !== -1) {
+        // Return text only up to the second full stop
+        return text.substring(0, secondStop + 1);
+      }
+      return text;
+    }
+
+    // --- CORE FUNCTIONS ---
     function initApp() {
-      sidebarInstance = new bootstrap.Offcanvas(document.getElementById('sidebarMenu'));
-      setTimeout(() => { document.getElementById('splashScreen').style.display = 'none'; loadNews(); }, 2000);
+      setTimeout(() => {
+        document.getElementById('splashScreen').style.display = 'none';
+        loadDemoNews();
+      }, 2000);
     }
 
-    function openMenu() { sidebarInstance.show(); }
-
-    function getImageUrl(item) {
-        const img = item.thumbnail || item.enclosure?.link || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]);
-        if (img && img.startsWith('http') && !img.includes('pixel')) return img;
-        return null; 
+    function handleBack() {
+      reader.style.display = 'none';
+      document.body.style.overflow = 'auto';
     }
 
-    function openReader(item) {
-      currentOpenItem = item;
-      const img = getImageUrl(item);
-      document.getElementById('rTitle').innerText = item.title;
-      document.getElementById('rSourceBadge').innerText = item.sourceName;
-      document.getElementById('rDate').innerText = new Date(item.pubDate).toLocaleDateString('ne-NP');
-      document.getElementById('rLink').href = item.link;
-      const rImg = document.getElementById('rImg');
-      if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
-      document.getElementById('rBody').innerHTML = item.content || item.description || "सामग्री उपलब्ध छैन।";
+    function openNewsReader(title, image, content, source) {
+      const formattedBody = formatNepaliContent(content);
+      const container = reader.querySelector('.reader-content');
       
-      let saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-      const isSaved = saved.some(n => n.link === item.link);
-      const btn = document.getElementById('mainSaveBtn');
-      btn.className = isSaved ? 'save-btn-circle saved' : 'save-btn-circle';
-      btn.querySelector('i').className = isSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
-      document.getElementById('newsReader').style.display = 'block';
+      container.innerHTML = `
+        <img src="${image}" class="img-fluid rounded-4 mb-3" style="width:100%; height:250px; object-fit:cover;">
+        <h2 class="news-title fs-3 mb-3">${title}</h2>
+        <span class="source-badge mb-3 d-inline-block">${source}</span>
+        <div class="news-body mt-2" style="font-family: 'Mukta', sans-serif; font-size: 1.2rem; line-height: 1.8;">
+          ${formattedBody}
+        </div>
+        <p class="text-muted mt-4 small"><em>बाँकी समाचार आधिकारिक वेबसाइटमा उपलब्ध छ।</em></p>
+      `;
+      
+      reader.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      reader.scrollTo(0, 0);
     }
 
-    function handleBack() { document.getElementById('newsReader').style.display = 'none'; }
-
-    async function loadNews() {
-      setActiveTab('homeTab');
-      toggleView('news');
+    function loadDemoNews() {
       const container = document.getElementById('newsContainer');
-      container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
-      
-      try {
-        const results = await Promise.all(feeds.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json()).then(data => (data.items || []).map(item => ({...item, sourceName: f.name, topic: getTopic(item.title)}))).catch(() => [])));
-        allNews = results.flat().sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-        
-        // --- Carousel Logic (Home Tab Only) ---
-        const newsWithImages = allNews.filter(item => getImageUrl(item) !== null);
-        const carouselItems = newsWithImages.slice(0, 5);
-        
-        const carouselInner = document.getElementById('carouselContent');
-        const carouselContainer = document.getElementById('newsCarousel');
-
-        if (carouselItems.length > 0) {
-            carouselContainer.style.display = 'block';
-            carouselInner.innerHTML = carouselItems.map((item, idx) => `
-                <div class="carousel-item ${idx === 0 ? 'active' : ''}" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                    <img src="${getImageUrl(item)}">
-                    <div class="carousel-caption">
-                        <span class="badge bg-primary mb-2">${item.sourceName}</span>
-                        <h5>${item.title}</h5>
-                    </div>
-                </div>
-            `).join('');
-            
-            const carouselLinks = carouselItems.map(c => c.link);
-            const listItems = allNews.filter(n => !carouselLinks.includes(n.link));
-            renderList(listItems);
-        } else {
-            carouselContainer.style.display = 'none';
-            renderList(allNews);
+      const demoData = [
+        {
+          title: "नेपालको नयाँ आर्थिक नीति सार्वजनिक",
+          img: "https://picsum.photos/800/400?1",
+          source: "कान्तिपुर",
+          content: "सरकारले आज नयाँ आर्थिक नीति सार्वजनिक गरेको छ। यस नीतिले साना व्यवसायीलाई राहत दिने लक्ष्य राखेको छ। आगामी वर्षको बजेटमा यसलाई थप व्याख्या गरिनेछ। धेरै मानिसहरू यसको पर्खाइमा थिए।"
         }
-      } catch (e) { container.innerHTML = "Error loading feeds."; }
-    }
+      ];
 
-    // --- NEW: Taja Function (No Carousel) ---
-    function showTaja() {
-        setActiveTab('tajaTab');
-        toggleView('news');
-        document.getElementById('newsCarousel').style.display = 'none'; // Hide Carousel specifically
-        renderList(allNews); // Show full list including those usually in carousel
-    }
-
-    function getTopic(text) {
-      if (text.includes('खेल')) return 'Sports';
-      if (text.includes('राजनीति')) return 'Politics';
-      if (text.includes('प्रविधि')) return 'Tech';
-      if (text.includes('अर्थ')) return 'Economy';
-      return 'General';
-    }
-
-    function renderList(list) {
-      const container = document.getElementById('newsContainer');
-      container.innerHTML = '';
-      list.forEach(item => {
-        const img = getImageUrl(item);
-        const div = document.createElement('div');
-        div.className = 'news-card';
-        div.onclick = () => openReader(item);
-        div.innerHTML = `
-          ${img ? `<img src="${img}">` : ''}
+      demoData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        card.onclick = () => openNewsReader(item.title, item.img, item.content, item.source);
+        card.innerHTML = `
+          <img src="${item.img}">
           <div class="card-content">
-            <div class="card-meta d-flex justify-content-between mb-2">
-              <span class="source-badge">${item.sourceName}</span>
-              <span style="font-family:'Mukta'; font-size:0.75rem">${new Date(item.pubDate).toLocaleDateString('ne-NP')}</span>
-            </div>
-            <div class="news-title">${item.title}</div>
-          </div>`;
-        container.appendChild(div);
+            <span class="source-badge">${item.source}</span>
+            <div class="news-title mt-2">${item.title}</div>
+          </div>
+        `;
+        container.appendChild(card);
       });
     }
 
-    function toggleView(view) {
-        document.getElementById('categorySection').style.display = (view === 'category') ? 'grid' : 'none';
-        document.getElementById('newsContainer').style.display = (view === 'news') ? 'block' : 'none';
-        document.getElementById('newsCarousel').style.display = (view === 'news') ? 'block' : 'none';
-    }
-
-    function showCategoryMenu() { setActiveTab('catTab'); toggleView('category'); }
-    
-    function filterByTopic(topic) { 
-        toggleView('news'); 
-        const filtered = topic === 'All' ? allNews : allNews.filter(n => n.topic === topic);
-        document.getElementById('newsCarousel').style.display = 'none'; // Hide carousel on category filter
-        renderList(filtered);
-    }
-
-    function setActiveTab(id) {
-         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-         document.getElementById(id).classList.add('active');
-    }
-
     function toggleDarkMode() {
-         document.body.classList.toggle('dark-mode');
-         document.getElementById('darkModeIcon').className = document.body.classList.contains('dark-mode') ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg';
+      document.body.classList.toggle('dark-mode');
+      const icon = document.getElementById('darkModeIcon');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
     }
 
-    function renderSaved() { setActiveTab('saveTab'); toggleView('news'); document.getElementById('newsCarousel').style.display = 'none'; const saved = JSON.parse(localStorage.getItem('savedNews') || '[]'); renderList(saved); }
-    
-    function toggleSaveCurrent() {
-        let saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-        const index = saved.findIndex(n => n.link === currentOpenItem.link);
-        const btn = document.getElementById('mainSaveBtn');
-        if (index > -1) {
-            saved.splice(index, 1); btn.classList.remove('saved'); btn.querySelector('i').className = 'far fa-bookmark';
-        } else {
-            saved.push(currentOpenItem); btn.classList.add('saved'); btn.querySelector('i').className = 'fas fa-bookmark';
-        }
-        localStorage.setItem('savedNews', JSON.stringify(saved));
+    function openMenu() {
+        new bootstrap.Offcanvas(document.getElementById('sidebarMenu')).show();
+    }
+
+    function showCategories() {
+        document.getElementById('categorySection').style.display = 'grid';
+        document.getElementById('newsContainer').style.display = 'none';
+        document.getElementById('newsCarousel').style.display = 'none';
+    }
+
+    function showHome() {
+        document.getElementById('categorySection').style.display = 'none';
+        document.getElementById('newsContainer').style.display = 'block';
     }
   </script>
 </body>
 </html>
+
