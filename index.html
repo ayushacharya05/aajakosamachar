@@ -1,232 +1,411 @@
+
 <!DOCTYPE html>
-<html lang="ne">
+<html lang="ne" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>आजको समाचार | PC Full Edition</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
-    :root {
-      --primary-color: #0052D4;
-      --surface-light: #F2F4F7;
-      --sidebar-bg: #FFFFFF;
-      --text-main: #1A1C1E;
-      --brand-black: #000000;
-    }
-
-    body { background: var(--surface-light); font-family: 'Outfit', sans-serif; margin: 0; display: flex; overflow: hidden; height: 100vh; }
-
-    /* --- SIDEBAR --- */
-    .pc-sidebar { width: 280px; height: 100vh; background: var(--sidebar-bg); border-right: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; z-index: 1000; overflow-y: auto; }
-    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 10; }
-    .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--brand-black); margin: 0; text-decoration: none; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>आजको समाचार | PC Premium Edition</title>
     
-    .menu-label { padding: 20px 20px 5px 20px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 700; }
-    .nav-link-custom { padding: 12px 20px; color: var(--text-main); text-decoration: none; display: flex; align-items: center; font-weight: 500; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; }
-    .nav-link-custom:hover, .nav-link-custom.active { background: #f0f4ff; color: var(--primary-color); border-left-color: var(--primary-color); }
-    .nav-link-custom i { width: 30px; font-size: 1.1rem; }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    /* --- MAIN CONTENT --- */
-    .main-wrapper { flex-grow: 1; height: 100vh; overflow-y: auto; padding: 40px; scroll-behavior: smooth; }
-    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+    <style>
+        :root {
+            --primary: #0052D4;
+            --sidebar-bg: #ffffff;
+            --main-bg: #f2f4f7;
+            --text-main: #1A1C1E;
+            --border-color: rgba(0,0,0,0.08);
+            --sidebar-width: 320px; /* Increased Width */
+        }
 
-    .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; border: none; display: flex; flex-direction: column; transition: 0.3s; height: 100%; }
-    .news-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
-    .card-img-container { width: 100%; height: 190px; overflow: hidden; }
-    .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
-    .card-content { padding: 20px; flex-grow: 1; }
-    .news-title { font-family: 'Mukta', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.4; color: #222; }
-    .source-badge { background: var(--primary-color); color: white; padding: 2px 10px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
+        [data-theme="dark"] {
+            --sidebar-bg: #111827;
+            --main-bg: #0b0f19;
+            --text-main: #f3f4f6;
+            --border-color: rgba(255,255,255,0.1);
+        }
 
-    /* --- CENTERED READER MODAL --- */
-    .reader-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .reader-modal-overlay.active { display: flex; }
-    
-    .reader-container { background: white; width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; position: relative; animation: slideUp 0.25s ease-out; }
-    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        body { 
+            font-family: 'Outfit', 'Mukta', sans-serif; 
+            background: var(--main-bg); color: var(--text-main);
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
+        }
 
-    .reader-header { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; background: white; }
-    .reader-scroll-area { padding: 30px; overflow-y: auto; }
-    .reader-body { font-size: 1.2rem; line-height: 1.8; font-family: 'Mukta'; color: #333; }
-    
-    .close-btn, .save-btn-circle { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    .save-btn-circle.saved { background: var(--primary-color); color: white; }
-    .close-btn:hover { background: #e0e0e0; }
-  </style>
+        /* --- BIGGER SIDEBAR --- */
+        .pc-sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header { 
+            padding: 40px 30px; 
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-name { 
+            font-family: 'Mukta', sans-serif; 
+            font-weight: 800; 
+            font-size: 2rem; 
+            color: var(--primary); 
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-scroll { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 20px 15px;
+        }
+
+        .menu-label { 
+            padding: 25px 20px 10px; 
+            font-size: 0.85rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            color: #94a3b8; 
+            font-weight: 700; 
+        }
+
+        .nav-link-custom { 
+            padding: 16px 20px; 
+            margin-bottom: 8px;
+            color: var(--text-main); 
+            text-decoration: none !important;
+            display: flex; 
+            align-items: center; 
+            font-weight: 600; 
+            font-size: 1.1rem; /* Bigger font */
+            border-radius: 15px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link-custom i { 
+            width: 35px; 
+            font-size: 1.3rem; 
+            opacity: 0.7;
+        }
+
+        .nav-link-custom:hover { 
+            background: rgba(0, 82, 212, 0.05); 
+            color: var(--primary); 
+        }
+
+        .nav-link-custom.active { 
+            background: var(--primary); 
+            color: white !important; 
+            box-shadow: 0 10px 20px rgba(0, 82, 212, 0.2);
+        }
+        .nav-link-custom.active i { opacity: 1; }
+
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-header {
+            padding: 20px 40px;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            background: var(--main-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 20px;
+            width: 400px;
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input {
+            border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; color: var(--text-main);
+        }
+
+        .scroll-content { 
+            padding: 40px; 
+            overflow-y: auto; 
+            scroll-behavior: smooth;
+        }
+
+        .news-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 30px; 
+        }
+
+        /* --- CARDS --- */
+        .news-card { 
+            background: var(--sidebar-bg); 
+            border-radius: 24px; 
+            overflow: hidden;
+            border: 1px solid var(--border-color); 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer;
+            height: 100%; display: flex; flex-direction: column;
+        }
+        .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .source-badge { font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; text-transform: uppercase; }
+        .news-title { font-family: 'Mukta'; font-size: 1.25rem; font-weight: 700; line-height: 1.4; color: var(--text-main); }
+
+        /* --- READER --- */
+        .reader-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(8px); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .reader-overlay.active { display: flex; }
+        .reader-window {
+            background: var(--sidebar-bg); width: 100%; max-width: 900px;
+            max-height: 90vh; border-radius: 30px; overflow-y: auto; padding: 50px;
+            position: relative; animation: popUp 0.3s ease;
+        }
+        @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .close-reader { position: absolute; top: 25px; right: 25px; border: none; background: #eee; border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; }
+
+        @media (max-width: 1024px) {
+            .pc-sidebar { width: 100px; }
+            .nav-text, .menu-label, .brand-name { display: none; }
+            .nav-link-custom { justify-content: center; padding: 20px; }
+            .nav-link-custom i { margin: 0; width: auto; }
+        }
+    </style>
 </head>
-<body onload="initApp()">
+<body>
 
-  <aside class="pc-sidebar">
-    <div class="sidebar-header">
-      <h1 class="brand-name">आजको समाचार</h1>
-    </div>
-    
-    <div class="menu-label">मुख्य</div>
-    <a class="nav-link-custom active" onclick="renderByFilter('All', this)"><i class="fas fa-home"></i> होम पेज</a>
-    <a class="nav-link-custom" onclick="renderByFilter('Taaja', this)"><i class="fas fa-bolt"></i> ताजा समाचार</a>
-    <a class="nav-link-custom" onclick="renderSaved(this)"><i class="fas fa-bookmark"></i> सेभ गरिएको</a>
-    
-    <div class="menu-label">विधाहरू</div>
-    <a class="nav-link-custom" onclick="renderByFilter('Politics', this)"><i class="fas fa-landmark"></i> राजनीति</a>
-    <a class="nav-link-custom" onclick="renderByFilter('Sports', this)"><i class="fas fa-trophy"></i> खेलकुद</a>
-    <a class="nav-link-custom" onclick="renderByFilter('Tech', this)"><i class="fas fa-microchip"></i> प्रविधि</a>
-    <a class="nav-link-custom" onclick="renderByFilter('Economy', this)"><i class="fas fa-chart-line"></i> अर्थतन्त्र</a>
-    <a class="nav-link-custom" onclick="renderByFilter('Entertainment', this)"><i class="fas fa-film"></i> मनोरञ्जन</a>
+    <!-- BIG SIDEBAR -->
+    <aside class="pc-sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="brand-name">आजको समाचार</a>
+        </div>
+        
+        <div class="nav-scroll">
+            <div class="menu-label">मुख्य ब्राउजिङ</div>
+            <a class="nav-link-custom active" onclick="filterBy('All', this)">
+                <i class="fas fa-th-large"></i> <span class="nav-text">होम पेज</span>
+            </a>
+            <a class="nav-link-custom" onclick="filterBy('Taaja', this)">
+                <i class="fas fa-fire"></i> <span class="nav-text">ताजा समाचार</span>
+            </a>
+            <a class="nav-link-custom" onclick="showSaved(this)">
+                <i class="fas fa-bookmark"></i> <span class="nav-text">सेभ गरिएको</span>
+            </a>
+            
+            <div class="menu-label">समाचार विधाहरू</div>
+            <a class="nav-link-custom" onclick="filterBy('Politics', this)">
+                <i class="fas fa-landmark"></i> <span class="nav-text">राजनीति</span>
+            </a>
+            <a class="nav-link-custom" onclick="filterBy('Economy', this)">
+                <i class="fas fa-chart-line"></i> <span class="nav-text">अर्थतन्त्र</span>
+            </a>
+            <a class="nav-link-custom" onclick="filterBy('Tech', this)">
+                <i class="fas fa-microchip"></i> <span class="nav-text">प्रविधि</span>
+            </a>
+            <a class="nav-link-custom" onclick="filterBy('Sports', this)">
+                <i class="fas fa-trophy"></i> <span class="nav-text">खेलकुद</span>
+            </a>
+            <a class="nav-link-custom" onclick="filterBy('Entertainment', this)">
+                <i class="fas fa-clapperboard"></i> <span class="nav-text">मनोरञ्जन</span>
+            </a>
+        </div>
 
-    <div class="mt-auto p-4">
-        <small class="text-muted">© 2026 आजको समाचार</small>
-    </div>
-  </aside>
+        <div class="p-4 border-top">
+            <button class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold" onclick="toggleTheme()">
+                <i class="fas fa-moon me-2"></i> Dark Mode
+            </button>
+        </div>
+    </aside>
 
-  <main class="main-wrapper">
-    <h2 id="viewTitle" class="fw-bold mb-4" style="font-family:'Mukta'">मुख्य समाचार</h2>
-    <div id="newsContainer" class="news-grid">
-        <div class="text-center w-100 p-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="mt-3">१५ वटा स्रोतबाट समाचार लोड हुँदैछ...</p>
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="search-bar">
+                <i class="fas fa-search text-muted"></i>
+                <input type="text" id="searchInput" placeholder="शीर्षक खोज्नुहोस्..." oninput="searchNews()">
+            </div>
+            <div id="dateNow" class="fw-bold text-muted"></div>
+        </header>
+
+        <div class="scroll-content">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h1 id="pageTitle" class="fw-extrabold m-0" style="font-family:'Mukta'; font-size: 2.5rem;">मुख्य समाचार</h1>
+                <span id="loadStatus" class="badge bg-primary px-3 py-2 rounded-pill">Loading...</span>
+            </div>
+
+            <div id="newsGrid" class="news-grid">
+                <!-- Skeleton Loading -->
+                <div class="text-center w-100 p-5">
+                    <div class="spinner-grow text-primary"></div>
+                    <p class="mt-3 fw-bold">१५ वटा प्रमुख स्रोतबाट समाचार संकलन हुँदैछ...</p>
+                </div>
+            </div>
         </div>
     </div>
-  </main>
 
-  <div id="readerOverlay" class="reader-modal-overlay" onclick="closeReader(event)">
-    <div class="reader-container" onclick="event.stopPropagation()">
-      <div class="reader-header">
-        <button class="close-btn" onclick="closeReader()"><i class="fas fa-times"></i></button>
-        <h5 class="mb-0 fw-bold" style="font-family:'Mukta'">विवरण</h5>
-        <button id="saveIconBtn" class="save-btn-circle" onclick="toggleSaveCurrent()"><i class="far fa-bookmark"></i></button>
-      </div>
-      <div class="reader-scroll-area">
-        <div id="rSource" class="source-badge d-inline-block mb-3"></div>
-        <h1 id="rTitle" class="fw-bold mb-4" style="font-family:'Mukta'; line-height: 1.3; color:#000;"></h1>
-        <img id="rImg" class="w-100 rounded-4 mb-4" src="" style="display:none">
-        <div id="rBody" class="reader-body"></div>
-        <a id="rLink" href="" target="_blank" class="btn btn-primary w-100 mt-5 py-3 rounded-pill fw-bold">पूरा समाचार स्रोतमा पढ्नुहोस्</a>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const feeds = [
-      { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
-      { name: "OK Entertainment", url: "https://www.onlinekhabar.com/entertainment/feed" },
-      { name: "Setopati", url: "https://setopati.com/feed" },
-      { name: "Ratopati", url: "https://www.ratopati.com/feed" },
-      { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
-      { name: "TechPana", url: "https://www.techpana.com/feed" },
-      { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
-      { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
-      { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
-      { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
-      { name: "Nepal News", url: "https://nepalnews.com/rss" },
-      { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
-      { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
-      { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
-      { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" }
-    ];
-
-    let allNews = [];
-    let currentItem = null;
-
-    async function initApp() {
-      try {
-        const results = await Promise.all(feeds.map(f => 
-          fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`)
-          .then(res => res.json())
-          .then(data => (data.items || []).map(item => ({
-            ...item, 
-            sourceName: f.name,
-            topic: getTopic(item.title + (item.description || "") + (item.categories ? item.categories.join(' ') : '')) 
-          })))
-          .catch(() => [])
-        ));
-        allNews = results.flat().sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-        renderList(allNews);
-      } catch (e) {
-        document.getElementById('newsContainer').innerHTML = "<p class='p-5 text-center'>समाचार लोड गर्न सकिएन।</p>";
-      }
-    }
-
-    function getTopic(text) {
-      if (/खेल|क्रिकेट|फुटबल|मैदान|ओलम्पिक|विश्वकप/.test(text)) return 'Sports';
-      if (/राजनीति|निर्वाचन|सरकार|मन्त्री|नेता|संसद|कांग्रेस|एमाले|माओवादी/.test(text)) return 'Politics';
-      if (/प्रविधि|मोबाइल|इन्टरनेट|एआई|सफ्टवेयर|डिजिटल|टेक/.test(text)) return 'Tech';
-      if (/अर्थ|शेयर|बजेट|बैंक|लगानी|ऋण|नेप्से|बीमा/.test(text)) return 'Economy';
-      if (/फिल्म|मनोरञ्जन|कलाकार|गीत|भिडियो|सिनेमा|कला/.test(text)) return 'Entertainment';
-      return 'General';
-    }
-
-    function renderList(list) {
-      const container = document.getElementById('newsContainer');
-      container.innerHTML = list.length ? '' : '<p class="p-5 text-center">कुनै समाचार भेटिएन।</p>';
-      list.forEach(item => {
-        const img = item.thumbnail || (item.enclosure && item.enclosure.link) || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]);
-        const hasImage = img && img.startsWith('http') && !img.includes('pixel');
-
-        const card = document.createElement('div');
-        card.className = 'news-card';
-        card.onclick = () => openReader(item);
-        card.innerHTML = `
-          ${hasImage ? `<div class="card-img-container"><img src="${img}" loading="lazy"></div>` : ''}
-          <div class="card-content">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="source-badge">${item.sourceName}</span>
-                <small class="text-muted"><i class="far fa-clock me-1"></i>${new Date(item.pubDate).toLocaleDateString('ne-NP')}</small>
+    <!-- Full Reader -->
+    <div id="readerOverlay" class="reader-overlay" onclick="closeReader()">
+        <div class="reader-window" onclick="event.stopPropagation()">
+            <button class="close-reader" onclick="closeReader()"><i class="fas fa-times"></i></button>
+            <div id="rSource" class="source-badge"></div>
+            <h1 id="rTitle" class="fw-bold mb-4" style="font-family:'Mukta'; font-size: 2.5rem; line-height: 1.2;"></h1>
+            <img id="rImg" class="w-100 rounded-4 mb-4 shadow" style="display:none; max-height: 450px; object-fit: cover;">
+            <div id="rBody" style="font-size: 1.3rem; line-height: 1.9; font-family:'Mukta';"></div>
+            <hr class="my-5">
+            <div class="d-flex gap-3">
+                <a id="rLink" target="_blank" class="btn btn-primary btn-lg px-5 rounded-pill">पूरा समाचार पढ्नुहोस्</a>
+                <button class="btn btn-light btn-lg px-4 rounded-pill" onclick="saveCurrent()"><i class="far fa-bookmark me-2"></i>सेभ गर्नुहोस्</button>
             </div>
-            <div class="news-title">${item.title}</div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+        </div>
+    </div>
 
-    function renderByFilter(filter, el) {
-      document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('viewTitle').innerText = (filter === 'All' ? 'मुख्य समाचार' : (filter === 'Taaja' ? 'ताजा समाचार' : filter));
-      let filtered = (filter === 'Taaja') ? allNews.slice(0, 25) : (filter === 'All' ? allNews : allNews.filter(n => n.topic === filter));
-      renderList(filtered);
-      document.querySelector('.main-wrapper').scrollTop = 0;
-    }
+    <script>
+        const sources = [
+            { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
+            { name: "Setopati", url: "https://setopati.com/feed" },
+            { name: "Ratopati", url: "https://www.ratopati.com/feed" },
+            { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
+            { name: "TechPana", url: "https://www.techpana.com/feed" },
+            { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
+            { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
+            { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
+            { name: "Nepal News", url: "https://nepalnews.com/rss" },
+            { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
+            { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
+            { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
+            { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
+            { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
+            { name: "OK Ent", url: "https://www.onlinekhabar.com/entertainment/feed" }
+        ];
 
-    function renderSaved(el) {
-      document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('viewTitle').innerText = "सेभ गरिएको समाचार";
-      renderList(JSON.parse(localStorage.getItem('pcSavedNews') || '[]'));
-    }
+        let allNews = [];
+        let currentItem = null;
 
-    function openReader(item) {
-      currentItem = item;
-      document.getElementById('rTitle').innerText = item.title;
-      document.getElementById('rSource').innerText = item.sourceName;
-      document.getElementById('rBody').innerHTML = item.content || item.description || "विवरण उपलब्ध छैन।";
-      document.getElementById('rLink').href = item.link;
-      const img = item.thumbnail || (item.enclosure && item.enclosure.link);
-      const rImg = document.getElementById('rImg');
-      if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
-      updateSaveBtn();
-      document.getElementById('readerOverlay').classList.add('active');
-    }
+        async function fetchNews() {
+            try {
+                const promises = sources.map(s => 
+                    fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(s.url)}`)
+                    .then(res => res.json())
+                    .then(data => (data.items || []).map(item => ({
+                        ...item, 
+                        source: s.name,
+                        topic: getTopic(item.title + item.description)
+                    })))
+                    .catch(() => [])
+                );
+                const results = await Promise.all(promises);
+                allNews = results.flat().sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+                render(allNews);
+                document.getElementById('loadStatus').innerText = `${allNews.length} समाचार`;
+            } catch (e) {
+                document.getElementById('newsGrid').innerHTML = "Error loading feeds.";
+            }
+        }
 
-    function toggleSaveCurrent() {
-      let saved = JSON.parse(localStorage.getItem('pcSavedNews') || '[]');
-      const idx = saved.findIndex(s => s.link === currentItem.link);
-      if (idx > -1) saved.splice(idx, 1); else saved.push(currentItem);
-      localStorage.setItem('pcSavedNews', JSON.stringify(saved));
-      updateSaveBtn();
-    }
+        function getTopic(text) {
+            if (/राजनीति|मन्त्री|सरकार|निर्वाचन|कांग्रेस|एमाले|संसद/.test(text)) return 'Politics';
+            if (/शेयर|बजेट|बैंक|नेप्से|अर्थ|लगानी|बीमा|वाणिज्य|बजार/.test(text)) return 'Economy';
+            if (/प्रविधि|डिजिटल|मोबाइल|इन्टरनेट|सफ्टवेयर|टेक|एआई/.test(text)) return 'Tech';
+            if (/खेल|क्रिकेट|फुटबल|ओलम्पिक|विश्वकप|मैदान/.test(text)) return 'Sports';
+            if (/फिल्म|मनोरञ्जन|कलाकार|गीत|सिनेमा|सुटिङ|सेलिब्रेटी/.test(text)) return 'Entertainment';
+            return 'General';
+        }
 
-    function updateSaveBtn() {
-      const saved = JSON.parse(localStorage.getItem('pcSavedNews') || '[]');
-      const isSaved = saved.some(s => s.link === currentItem.link);
-      const sBtn = document.getElementById('saveIconBtn');
-      sBtn.className = isSaved ? 'save-btn-circle saved' : 'save-btn-circle';
-      sBtn.innerHTML = isSaved ? '<i class="fas fa-bookmark"></i>' : '<i class="far fa-bookmark"></i>';
-    }
+        function render(items) {
+            const grid = document.getElementById('newsGrid');
+            grid.innerHTML = items.length ? '' : '<div class="p-5 text-center w-100">कुनै समाचार भेटिएन।</div>';
+            
+            items.forEach(item => {
+                const img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.onclick = () => openReader(item);
+                card.innerHTML = `
+                    ${img ? `<img src="${img}" class="card-img" onerror="this.style.display='none'">` : ''}
+                    <div class="card-body">
+                        <div class="source-badge">${item.source}</div>
+                        <div class="news-title">${item.title}</div>
+                        <div class="mt-auto pt-3 text-muted small fw-bold">
+                            <i class="far fa-calendar-alt me-2"></i> ${new Date(item.pubDate).toLocaleDateString('ne-NP')}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-    function closeReader() { document.getElementById('readerOverlay').classList.remove('active'); }
-  </script>
+        function filterBy(type, el) {
+            document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('pageTitle').innerText = el.querySelector('.nav-text').innerText;
+            
+            let filtered = allNews;
+            if(type === 'Taaja') filtered = allNews.slice(0, 25);
+            else if(type !== 'All') filtered = allNews.filter(n => n.topic === type);
+            render(filtered);
+            document.querySelector('.scroll-content').scrollTop = 0;
+        }
+
+        function searchNews() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            render(allNews.filter(n => n.title.toLowerCase().includes(query)));
+        }
+
+        function openReader(item) {
+            currentItem = item;
+            document.getElementById('rTitle').innerText = item.title;
+            document.getElementById('rSource').innerText = item.source;
+            document.getElementById('rBody').innerHTML = item.content || item.description;
+            document.getElementById('rLink').href = item.link;
+            const img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
+            const rImg = document.getElementById('rImg');
+            if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
+            document.getElementById('readerOverlay').classList.add('active');
+        }
+
+        function closeReader() { document.getElementById('readerOverlay').classList.remove('active'); }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        }
+
+        function saveCurrent() {
+            let saved = JSON.parse(localStorage.getItem('nepali_news_saved') || '[]');
+            if(!saved.find(s => s.link === currentItem.link)) {
+                saved.push(currentItem);
+                localStorage.setItem('nepali_news_saved', JSON.stringify(saved));
+                alert('Saved!');
+            }
+        }
+
+        function showSaved(el) {
+            document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('pageTitle').innerText = "सेभ गरिएको समाचार";
+            render(JSON.parse(localStorage.getItem('nepali_news_saved') || '[]'));
+        }
+
+        // Set Date
+        document.getElementById('dateNow').innerText = new Date().toLocaleDateString('ne-NP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        window.onload = fetchNews;
+    </script>
 </body>
 </html>
