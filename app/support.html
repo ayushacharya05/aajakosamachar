@@ -8,55 +8,161 @@
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    :root { --primary-color: #0052D4; --surface-light: #F2F4F7; --card-bg-light: #FFFFFF; --text-main-light: #1A1C1E; }
-    body { background: var(--surface-light); font-family: 'Outfit', sans-serif; color: var(--text-main-light); padding-bottom: 90px; }
-    .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1050; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.05); }
-    .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.8rem; margin: 0; color: #000; }
-    .support-card { margin: 10px 16px; background: var(--card-bg-light); border-radius: 24px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-    .support-item { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); text-decoration: none; color: inherit; }
-    .item-icon { width: 45px; height: 45px; background: rgba(0, 82, 212, 0.1); color: var(--primary-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; }
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 10px 0 25px 0; text-align: center; box-shadow: 0 -2px 15px rgba(0,0,0,0.08); }
-    .nav-item { color: #70757A; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
-    .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 2px; }
-    body.dark-mode { background: #0E1113; color: #E2E2E6; }
-    .dark-mode .app-header { background: #111; border-bottom-color: #333; }
-    .dark-mode .brand-name { color: white; }
-    .dark-mode .support-card { background: #1C1F26; }
-    .dark-mode .bottom-nav { background: #111; }
+    :root { 
+      --primary-color: #0052D4; 
+      --surface-light: #F2F4F7; 
+      --card-bg-light: #FFFFFF; 
+      --text-main-light: #1A1C1E; 
+      --surface-dark: #0E1113;
+      --card-bg-dark: #1C1F26;
+    }
+
+    body { 
+      background: var(--surface-light); 
+      font-family: 'Outfit', sans-serif; 
+      color: var(--text-main-light); 
+      padding-bottom: 110px; 
+      transition: background 0.3s;
+    }
+
+    .app-header { 
+      background: rgba(255, 255, 255, 0.95); 
+      backdrop-filter: blur(20px); 
+      position: sticky; 
+      top: 0; 
+      z-index: 1050; 
+      padding: 14px 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-bottom: 1px solid rgba(0,0,0,0.08); 
+    }
+
+    .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; color: inherit; }
+
+    .support-card { 
+      margin: 15px 16px; 
+      background: var(--card-bg-light); 
+      border-radius: 24px; 
+      overflow: hidden; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .support-item { 
+      display: flex; 
+      align-items: center; 
+      padding: 20px; 
+      border-bottom: 1px solid rgba(0,0,0,0.05); 
+      text-decoration: none; 
+      color: inherit; 
+      transition: background 0.2s;
+    }
+    
+    .support-item:last-child { border-bottom: none; }
+    .support-item:active { background: rgba(0,0,0,0.02); }
+
+    .item-icon { 
+      width: 45px; 
+      height: 45px; 
+      background: rgba(0, 82, 212, 0.1); 
+      color: var(--primary-color); 
+      border-radius: 12px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      margin-right: 15px; 
+    }
+
+    /* --- MATCHING FLOATING BOTTOM NAV --- */
+    .bottom-nav { 
+        position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px;
+        background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+        display: flex; justify-content: space-around; align-items: center; 
+        border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); 
+        z-index: 1030; border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .nav-item { 
+        position: relative; color: #888; text-decoration: none;
+        display: flex; flex-direction: column; align-items: center;
+        transition: all 0.3s ease; flex: 1;
+    }
+    .nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
+    .nav-item span { font-size: 0.72rem; font-weight: 600; font-family: 'Mukta', sans-serif; }
+    
+    /* Dark Mode Styles */
+    body.dark-mode { background: var(--surface-dark); color: #E2E2E6; }
+    .dark-mode .app-header { background: var(--card-bg-dark); border-color: #333; }
+    .dark-mode .support-card { background: var(--card-bg-dark); border-color: #333; }
+    .dark-mode .bottom-nav { background: rgba(28, 31, 38, 0.9); border-color: rgba(255, 255, 255, 0.05); }
+    .dark-mode .nav-item { color: #71767b; }
+    .dark-mode .support-item { border-bottom-color: #333; }
+    .dark-mode .support-item:active { background: rgba(255,255,255,0.03); }
   </style>
 </head>
 <body>
 
   <header class="app-header">
-    <a href="index.html" style="color: inherit;"><i class="fas fa-arrow-left fa-lg"></i></a>
+    <a href="index.html" style="color: inherit; text-decoration: none;"><i class="fas fa-arrow-left fa-lg"></i></a>
     <h1 class="brand-name">आजको समाचार</h1>
-    <div></div>
+    <div style="width: 24px;"></div>
   </header>
 
-  <div class="text-center mt-4 mb-3">
+  <div class="text-center mt-5 mb-4">
     <i class="fas fa-headset fa-3x" style="color:var(--primary-color)"></i>
-    <h2 class="fw-bold">सहयोग</h2>
+    <h2 class="fw-bold mt-2" style="font-family: 'Mukta';">सहयोग र सम्पर्क</h2>
   </div>
 
   <div class="support-card">
     <div class="support-item">
       <div class="item-icon"><i class="fas fa-user"></i></div>
-      <div><h6 class="mb-0">Ayush Acharya</h6><small class="text-muted">Developer</small></div>
+      <div>
+        <h6 class="mb-0 fw-bold">Ayush Acharya</h6>
+        <small class="text-muted">Developer</small>
+      </div>
     </div>
-    <a href="mailto:Contact@ayushacharya5.com.np" class="support-item">
+    
+    <a href="mailto:support@example.com" class="support-item">
       <div class="item-icon"><i class="fas fa-envelope"></i></div>
-      <div><h6 class="mb-0">इमेल</h6><small class="text-muted">Contact@ayushacharya5.com.np</small></div>
+      <div>
+        <h6 class="mb-0 fw-bold">इमेल</h6>
+        <small class="text-muted">हामीलाई इमेल पठाउनुहोस्</small>
+      </div>
+    </a>
+
+    <a href="#" class="support-item">
+      <div class="item-icon"><i class="fas fa-shield-alt"></i></div>
+      <div>
+        <h6 class="mb-0 fw-bold">गोपनीयता नीति</h6>
+        <small class="text-muted">Privacy Policy</small>
+      </div>
     </a>
   </div>
 
   <nav class="bottom-nav">
-    <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>होम</span></a>
-    <a href="index.html" class="nav-item"><i class="fas fa-bolt"></i><span>ताजा</span></a>
-    <a href="index.html" class="nav-item"><i class="fas fa-bookmark"></i><span>सेभ</span></a>
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-house"></i>
+      <span>होम</span>
+    </a>
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-grip-vertical"></i>
+      <span>विधा</span>
+    </a>
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-fire-alt"></i>
+      <span>ताजा</span>
+    </a>
+    <a href="index.html" class="nav-item">
+      <i class="fas fa-bookmark"></i>
+      <span>सेभ</span>
+    </a>
   </nav>
 
   <script>
-    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    // Local theme persistence
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
   </script>
 </body>
 </html>
