@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ne">
 <head>
@@ -18,7 +16,6 @@
       --surface-dark: #0E1113; 
       --card-bg-dark: #1C1F26;
     }
-
     #splashScreen { 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
         background: #ffffff; z-index: 9999; display: flex; 
@@ -30,34 +27,26 @@
     body { background: var(--surface-light); font-family: 'Outfit', sans-serif; color: var(--text-main-light); padding-bottom: 100px; transition: background 0.3s; overflow-x: hidden; }
     .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1040; padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
     .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; }
-
     #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; }
     .carousel-item { height: 260px; background: #000; cursor: pointer; }
     .carousel-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
     .carousel-caption { text-align: left; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 25px 15px 15px 15px; width: 100%; margin: 0; }
     .carousel-caption h5 { font-family: 'Mukta'; font-weight: 700; font-size: 1.15rem; margin-bottom: 5px; line-height: 1.3; color: #fff; }
-
     #categorySection { padding: 20px; display: none; grid-template-columns: repeat(2, 1fr); gap: 15px; }
     .cat-tile { background: var(--card-bg-light); border-radius: 16px; padding: 25px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
-
     .offcanvas { width: 280px !important; border: none !important; }
     .nav-link-custom { padding: 15px 20px; border-radius: 12px; color: inherit; text-decoration: none; display: flex; align-items: center; margin-bottom: 5px; font-weight: 500; }
     .nav-link-custom i { width: 35px; color: var(--primary-color); font-size: 1.2rem; }
-
-    /* Updated Taja Card */
     .taja-card { background: var(--card-bg-light); padding: 15px; border-radius: 18px; margin-bottom: 15px; display: flex; gap: 15px; border-left: 4px solid var(--primary-color); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; align-items: center; }
     .taja-source { font-size: 0.7rem; color: var(--primary-color); font-weight: 800; min-width: 85px; text-align: center; background: rgba(0, 82, 212, 0.1); border-radius: 8px; padding: 6px 4px; height: fit-content; text-transform: uppercase; }
     .taja-title { font-family: 'Mukta'; font-weight: 600; font-size: 1.05rem; line-height: 1.4; }
-
     .bottom-nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 1030; border: 1px solid rgba(255, 255, 255, 0.3); }
     .nav-item { color: #888; text-decoration: none; display: flex; flex-direction: column; align-items: center; flex: 1; border: none; background: none; }
     .nav-item.active { color: var(--primary-color); }
     .nav-item i { font-size: 1.3rem; }
     .nav-item span { font-size: 0.72rem; font-weight: 600; font-family: 'Mukta'; }
-
     #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; }
     .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 2001; }
-    
     .dark-mode { background: var(--surface-dark); color: white; }
     .dark-mode .app-header, .dark-mode #newsReader, .dark-mode .cat-tile, .dark-mode .taja-card, .dark-mode .offcanvas, .dark-mode .news-card { background: var(--card-bg-dark) !important; color: white !important; }
     .dark-mode .bottom-nav { background: rgba(28, 31, 38, 0.9) !important; }
@@ -123,7 +112,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-     const feeds = [
+    const feeds = [
       { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
       { name: "Setopati", url: "https://setopati.com/feed" },
       { name: "Ratopati", url: "https://www.ratopati.com/feed" },
@@ -138,15 +127,13 @@
       { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
       { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
       { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
-         { name: "ICT frame", url: "https://np.ictframe.com/rss" },
-         { name: "Technology Khabar", url: "https://www.technologykhabar.com/rss" },
-          { name: "News filmy", url: "https://newsfilmy.com/rss" },
-            { name: "Nepali Paisa", url: "https://nepalipaisa.com/rss" },
-            { name: "Ramailo Cha", url: "https://www.ramailo6.com/rss" },
-              { name: "Bizmandu", url: "https://bizmandu.com/rss" },
-     { name: "Routine Of Nepal Banda ", url: "https://www.ronbpost.com/rss" },
-
-
+      { name: "ICT frame", url: "https://np.ictframe.com/rss" },
+      { name: "Technology Khabar", url: "https://www.technologykhabar.com/rss" },
+      { name: "News filmy", url: "https://newsfilmy.com/rss" },
+      { name: "Nepali Paisa", url: "https://nepalipaisa.com/rss" },
+      { name: "Ramailo Cha", url: "https://www.ramailo6.com/rss" },
+      { name: "Bizmandu", url: "https://bizmandu.com/rss" },
+      { name: "Routine Of Nepal Banda", url: "https://www.ronbpost.com/rss" },
     ];
 
     let allNews = [], currentNewsItem = null, sidebarInstance = null;
@@ -163,10 +150,25 @@
         return parts.length > 1 ? parts[0] + ' ' + parts[1] : parts[0];
     }
 
+    // UPDATED: Logic to show splash screen only once per session
     function initApp() {
       sidebarInstance = new bootstrap.Offcanvas(document.getElementById('sidebarMenu'));
       window.onpopstate = () => { document.getElementById('newsReader').style.display = 'none'; };
-      setTimeout(() => { document.getElementById('splashScreen').style.display = 'none'; loadNews(); }, 1500);
+
+      const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+
+      if (hasSeenSplash) {
+        // Skip splash screen
+        document.getElementById('splashScreen').style.display = 'none';
+        loadNews();
+      } else {
+        // Show splash screen, then mark as seen
+        setTimeout(() => {
+          document.getElementById('splashScreen').style.display = 'none';
+          sessionStorage.setItem('hasSeenSplash', 'true');
+          loadNews();
+        }, 1500);
+      }
     }
 
     function getImageUrl(item) { return item.thumbnail || item.enclosure?.link || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]) || null; }
@@ -232,7 +234,6 @@
       setActiveTab('tajaTab'); toggleView('news');
       document.getElementById('newsCarousel').style.display = 'none';
       document.getElementById('categorySection').style.display = 'none';
-      // UPDATED: Now shows Source Name instead of Time
       document.getElementById('newsContainer').innerHTML = allNews.slice(0, 30).map(item => {
         return `<div class="taja-card" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
                   <div class="taja-source">${item.sourceName}</div>
@@ -241,19 +242,19 @@
       }).join('');
     }
 
-    function getTopic(t) { 
-        if (/खेल|क्रिकेट|फुटबल/i.test(t)) return 'Sports'; 
-        if (/राजनीति|नेता|सरकार/i.test(t)) return 'Politics'; 
-        if (/प्रविधि|मोबाइल|इन्टरनेट/i.test(t)) return 'Tech'; 
-        if (/फिल्म|मनोरञ्जन|कलाकार/i.test(t)) return 'Entertainment'; 
-        if (/बैंक|अर्थ|बजार|शेयर/i.test(t)) return 'Economy'; 
-        return 'General'; 
-    }
+    function getTopic(t) {
+         if (/खेल|क्रिकेट|फुटबल/i.test(t)) return 'Sports';
+         if (/राजनीति|नेता|सरकार/i.test(t)) return 'Politics';
+         if (/प्रविधि|मोबाइल|इन्टरनेट/i.test(t)) return 'Tech';
+         if (/फिल्म|मनोरञ्जन|कलाकार/i.test(t)) return 'Entertainment';
+         if (/बैंक|अर्थ|बजार|शेयर/i.test(t)) return 'Economy';
+         return 'General';
+     }
 
-    function toggleView(v) { 
-        document.getElementById('categorySection').style.display = (v === 'category') ? 'grid' : 'none'; 
-        document.getElementById('newsContainer').style.display = (v === 'news') ? 'block' : 'none'; 
-    }
+    function toggleView(v) {
+         document.getElementById('categorySection').style.display = (v === 'category') ? 'grid' : 'none';
+         document.getElementById('newsContainer').style.display = (v === 'news') ? 'block' : 'none';
+     }
 
     function showCategoryMenu() { setActiveTab('catTab'); toggleView('category'); document.getElementById('newsCarousel').style.display = 'none'; }
     function filterByTopic(topic) { setActiveTab('catTab'); toggleView('news'); const filtered = (topic === 'All') ? allNews : allNews.filter(n => n.topic === topic); renderList(filtered); }
@@ -261,6 +262,5 @@
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); document.getElementById('darkModeIcon').className = document.body.classList.contains('dark-mode') ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg'; }
     function openMenu() { sidebarInstance.show(); }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e80e1760ac3cf60',t:'MTc3NTQ3OTQzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"b20fbb14051e4dad99d13f71779b4a7c","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
