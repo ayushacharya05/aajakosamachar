@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ne" data-theme="light">
 <head>
@@ -13,28 +12,40 @@
 
     <style>
         :root {
-            --primary: #0052D4;
+            --primary: #1a73e8;
+            --primary-light: rgba(26, 115, 232, 0.08);
             --sidebar-bg: #ffffff;
-            --main-bg: #f2f4f7;
-            --text-main: #1A1C1E;
-            --border-color: rgba(0,0,0,0.08);
-            --sidebar-width: 320px; /* Increased Width */
+            --main-bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --brand-color: #000000; /* आजको समाचार Black */
+            --border-color: #e2e8f0;
+            --sidebar-width: 300px;
+            --card-bg: #ffffff;
         }
 
         [data-theme="dark"] {
-            --sidebar-bg: #111827;
-            --main-bg: #0b0f19;
-            --text-main: #f3f4f6;
-            --border-color: rgba(255,255,255,0.1);
+            --sidebar-bg: #0f172a;
+            --main-bg: #020617;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --brand-color: #ffffff;
+            --border-color: #1e293b;
+            --card-bg: #1e293b;
+            --primary-light: rgba(38, 132, 255, 0.15);
         }
 
         body { 
             font-family: 'Outfit', 'Mukta', sans-serif; 
-            background: var(--main-bg); color: var(--text-main);
-            margin: 0; display: flex; height: 100vh; overflow: hidden;
+            background: var(--main-bg); 
+            color: var(--text-main);
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden;
         }
 
-        /* --- BIGGER SIDEBAR --- */
+        /* --- MODERN SIDEBAR --- */
         .pc-sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -42,70 +53,75 @@
             display: flex;
             flex-direction: column;
             z-index: 1000;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header { 
-            padding: 40px 30px; 
-            border-bottom: 1px solid var(--border-color);
+            padding: 35px 30px 25px 30px; 
         }
 
         .brand-name { 
             font-family: 'Mukta', sans-serif; 
             font-weight: 800; 
-            font-size: 2rem; 
-            color: var(--primary); 
-            text-decoration: none;
-            display: block;
+            font-size: 2.2rem; 
+            color: var(--brand-color); 
+            text-decoration: none !important;
+            display: inline-block;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        .brand-name span {
+            color: #ef4444;
         }
 
         .nav-scroll { 
             flex-grow: 1; 
             overflow-y: auto; 
-            padding: 20px 15px;
+            padding: 10px 20px;
         }
 
         .menu-label { 
-            padding: 25px 20px 10px; 
-            font-size: 0.85rem; 
+            padding: 20px 15px 8px; 
+            font-size: 0.8rem; 
             text-transform: uppercase; 
             letter-spacing: 1.5px; 
-            color: #94a3b8; 
+            color: var(--text-muted); 
             font-weight: 700; 
         }
 
         .nav-link-custom { 
-            padding: 16px 20px; 
-            margin-bottom: 8px;
-            color: var(--text-main); 
+            padding: 14px 18px; 
+            margin-bottom: 6px;
+            color: var(--text-muted); 
             text-decoration: none !important;
             display: flex; 
             align-items: center; 
             font-weight: 600; 
-            font-size: 1.1rem; /* Bigger font */
-            border-radius: 15px;
-            transition: 0.2s;
+            font-size: 1.05rem; 
+            border-radius: 12px;
+            transition: all 0.2s ease;
             cursor: pointer;
         }
 
         .nav-link-custom i { 
-            width: 35px; 
-            font-size: 1.3rem; 
-            opacity: 0.7;
+            width: 30px; 
+            font-size: 1.2rem; 
+            transition: transform 0.2s;
         }
 
         .nav-link-custom:hover { 
-            background: rgba(0, 82, 212, 0.05); 
+            background: var(--primary-light); 
             color: var(--primary); 
+        }
+        .nav-link-custom:hover i {
+            transform: translateX(3px);
         }
 
         .nav-link-custom.active { 
             background: var(--primary); 
             color: white !important; 
-            box-shadow: 0 10px 20px rgba(0, 82, 212, 0.2);
+            box-shadow: 0 8px 16px rgba(26, 115, 232, 0.2);
         }
-        .nav-link-custom.active i { opacity: 1; }
 
         /* --- MAIN CONTENT --- */
         .main-wrapper { 
@@ -130,9 +146,14 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 10px 20px;
-            width: 400px;
+            width: 380px;
             display: flex;
             align-items: center;
+            transition: all 0.2s;
+        }
+        .search-bar:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
         .search-bar input {
             border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; color: var(--text-main);
@@ -150,68 +171,121 @@
             gap: 30px; 
         }
 
-        /* --- CARDS --- */
+        /* --- PREMIUM CARDS WITH EQUAL HEIGHT & IMAGE PLACEHOLDER --- */
         .news-card { 
-            background: var(--sidebar-bg); 
-            border-radius: 24px; 
+            background: var(--card-bg); 
+            border-radius: 20px; 
             overflow: hidden;
             border: 1px solid var(--border-color); 
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             cursor: pointer;
-            height: 100%; display: flex; flex-direction: column;
+            height: 100%; 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .card-img { width: 100%; height: 200px; object-fit: cover; }
-        .card-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
-        .source-badge { font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; text-transform: uppercase; }
-        .news-title { font-family: 'Mukta'; font-size: 1.25rem; font-weight: 700; line-height: 1.4; color: var(--text-main); }
+        .news-card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08); 
+            border-color: var(--primary);
+        }
+        
+        .card-img-container {
+            width: 100%;
+            height: 210px;
+            overflow: hidden;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.5s; 
+        }
+        .news-card:hover .card-img { 
+            transform: scale(1.03); 
+        }
+        
+        .card-body { 
+            padding: 22px; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .source-badge { 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            margin-bottom: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .news-title { 
+            font-family: 'Mukta'; 
+            font-size: 1.3rem; 
+            font-weight: 700; 
+            line-height: 1.45; 
+            color: var(--text-main); 
+            margin-bottom: 15px;
+        }
 
-        /* --- READER --- */
+        /* --- READER OVERLAY --- */
         .reader-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
-            backdrop-filter: blur(8px); z-index: 2000;
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(12px); z-index: 2000;
             display: none; align-items: center; justify-content: center; padding: 20px;
         }
         .reader-overlay.active { display: flex; }
         .reader-window {
-            background: var(--sidebar-bg); width: 100%; max-width: 900px;
-            max-height: 90vh; border-radius: 30px; overflow-y: auto; padding: 50px;
-            position: relative; animation: popUp 0.3s ease;
+            background: var(--sidebar-bg); width: 100%; max-width: 850px;
+            max-height: 85vh; border-radius: 24px; overflow-y: auto; padding: 45px;
+            position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .close-reader { position: absolute; top: 25px; right: 25px; border: none; background: #eee; border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; }
+        @keyframes popUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        
+        .close-reader { 
+            position: absolute; top: 25px; right: 25px; border: none; 
+            background: var(--main-bg); color: var(--text-main); border-radius: 50%; 
+            width: 40px; height: 40px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .close-reader:hover { background: #ef4444; color: white; }
 
         @media (max-width: 1024px) {
-            .pc-sidebar { width: 100px; }
-            .nav-text, .menu-label, .brand-name { display: none; }
-            .nav-link-custom { justify-content: center; padding: 20px; }
-            .nav-link-custom i { margin: 0; width: auto; }
+            .pc-sidebar { width: 90px; }
+            .nav-text, .menu-label, .brand-name, .sidebar-header span { display: none; }
+            .nav-link-custom { justify-content: center; padding: 18px; margin: 10px; }
+            .nav-link-custom i { margin: 0; width: auto; font-size: 1.4rem; }
+            .sidebar-header { padding: 30px 10px; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- BIG SIDEBAR -->
     <aside class="pc-sidebar">
         <div class="sidebar-header">
-            <a href="#" class="brand-name">आजको समाचार</a>
+            <a href="#" class="brand-name">आजको समाचार<span>.</span></a>
         </div>
-        
+                
         <div class="nav-scroll">
             <div class="menu-label">मुख्य ब्राउजिङ</div>
             <a class="nav-link-custom active" onclick="filterBy('All', this)">
-                <i class="fas fa-th-large"></i> <span class="nav-text">होम पेज</span>
+                <i class="fas fa-th-large me-2"></i> <span class="nav-text">होम पेज</span>
             </a>
             <a class="nav-link-custom" onclick="filterBy('Taaja', this)">
-                <i class="fas fa-fire"></i> <span class="nav-text">ताजा समाचार</span>
+                <i class="fas fa-fire me-2"></i> <span class="nav-text">ताजा समाचार</span>
             </a>
             <a class="nav-link-custom" onclick="showSaved(this)">
-                <i class="fas fa-bookmark"></i> <span class="nav-text">सेभ गरिएको</span>
+                <i class="fas fa-bookmark me-2"></i> <span class="nav-text">सेभ गरिएको</span>
             </a>
-            
+                        
             <div class="menu-label">समाचार विधाहरू</div>
             <a class="nav-link-custom" onclick="filterBy('Politics', this)">
-                <i class="fas fa-landmark"></i> <span class="nav-text">राजनीति</span>
+                <i class="fas fa-landmark me-2"></i> <span class="nav-text">राजनीति</span>
             </a>
             <a class="nav-link-custom" onclick="filterBy('Economy', this)">
                 <i class="fas fa-chart-line"></i> <span class="nav-text">अर्थतन्त्र</span>
@@ -227,8 +301,8 @@
             </a>
         </div>
 
-        <div class="p-4 border-top">
-            <button class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold" onclick="toggleTheme()">
+        <div class="p-4 border-top border-secondary-subtle">
+            <button class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold" onclick="toggleTheme()" id="themeBtn">
                 <i class="fas fa-moon me-2"></i> Dark Mode
             </button>
         </div>
@@ -245,57 +319,66 @@
 
         <div class="scroll-content">
             <div class="d-flex justify-content-between align-items-center mb-5">
-                <h1 id="pageTitle" class="fw-extrabold m-0" style="font-family:'Mukta'; font-size: 2.5rem;">मुख्य समाचार</h1>
+                <h1 id="pageTitle" class="fw-bold m-0" style="font-family:'Mukta'; font-size: 2.6rem;">मुख्य समाचार</h1>
                 <span id="loadStatus" class="badge bg-primary px-3 py-2 rounded-pill">Loading...</span>
             </div>
 
             <div id="newsGrid" class="news-grid">
-                <!-- Skeleton Loading -->
                 <div class="text-center w-100 p-5">
-                    <div class="spinner-grow text-primary"></div>
-                    <p class="mt-3 fw-bold">१५ वटा प्रमुख स्रोतबाट समाचार संकलन हुँदैछ...</p>
+                    <div class="spinner-grow text-primary" role="status"></div>
+                    <p class="mt-3 fw-bold text-muted">१५ वटा प्रमुख स्रोतबाट समाचार संकलन हुँदैछ...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Full Reader -->
     <div id="readerOverlay" class="reader-overlay" onclick="closeReader()">
         <div class="reader-window" onclick="event.stopPropagation()">
             <button class="close-reader" onclick="closeReader()"><i class="fas fa-times"></i></button>
             <div id="rSource" class="source-badge"></div>
-            <h1 id="rTitle" class="fw-bold mb-4" style="font-family:'Mukta'; font-size: 2.5rem; line-height: 1.2;"></h1>
-            <img id="rImg" class="w-100 rounded-4 mb-4 shadow" style="display:none; max-height: 450px; object-fit: cover;">
-            <div id="rBody" style="font-size: 1.3rem; line-height: 1.9; font-family:'Mukta';"></div>
+            <h1 id="rTitle" class="fw-bold mb-4" style="font-family:'Mukta'; font-size: 2.4rem; line-height: 1.3;"></h1>
+            <img id="rImg" class="w-100 rounded-4 mb-4 shadow-sm" style="display:none; max-height: 420px; object-fit: cover;">
+            <div id="rBody" style="font-size: 1.25rem; line-height: 1.8; font-family:'Mukta';"></div>
             <hr class="my-5">
             <div class="d-flex gap-3">
-                <a id="rLink" target="_blank" class="btn btn-primary btn-lg px-5 rounded-pill">पूरा समाचार पढ्नुहोस्</a>
-                <button class="btn btn-light btn-lg px-4 rounded-pill" onclick="saveCurrent()"><i class="far fa-bookmark me-2"></i>सेभ गर्नुहोस्</button>
+                <a id="rLink" target="_blank" class="btn btn-primary btn-lg px-5 rounded-pill fs-6">पूरा समाचार पढ्नुहोस्</a>
+                <button class="btn btn-light btn-lg px-4 rounded-pill fs-6" onclick="saveCurrent()"><i class="far fa-bookmark me-2"></i>सेभ गर्नुहोस्</button>
             </div>
         </div>
     </div>
 
     <script>
         const sources = [
-            { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
-            { name: "Setopati", url: "https://setopati.com/feed" },
-            { name: "Ratopati", url: "https://www.ratopati.com/feed" },
-            { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
-            { name: "TechPana", url: "https://www.techpana.com/feed" },
-            { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
-            { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
-            { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
-            { name: "Nepal News", url: "https://nepalnews.com/rss" },
-            { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
-            { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
-            { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
-            { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
-            { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
-            { name: "OK Ent", url: "https://www.onlinekhabar.com/entertainment/feed" }
-        ];
+          { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
+      { name: "Setopati", url: "https://setopati.com/feed" },
+      { name: "Ratopati", url: "https://www.ratopati.com/feed" },
+      { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
+      { name: "TechPana", url: "https://www.techpana.com/feed" },
+      { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
+      { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
+      { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
+      { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
+      { name: "Nepal News", url: "https://nepalnews.com/rss" },
+      { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
+      { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
+      { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
+      { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
+      { name: "ICT frame", url: "https://np.ictframe.com/rss" },
+      { name: "Technology Khabar", url: "https://www.technologykhabar.com/rss" },
+      { name: "News filmy", url: "https://newsfilmy.com/rss" },
+      { name: "Nepali Paisa", url: "https://nepalipaisa.com/rss" },
+      { name: "Ramailo Cha", url: "https://www.ramailo6.com/rss" },
+      { name: "Bizmandu", url: "https://bizmandu.com/rss" },
+      { name: "Routine Of Nepal Banda", url: "https://www.ronbpost.com/rss" },
+      { name: "Baahrakhari", url: "https://baahrakhari.com/feed" },
+    ];
+
 
         let allNews = [];
         let currentItem = null;
+        
+        // एउटा राम्रो न्यूट्रल प्रिमियम ब्याकग्राउन्ड फोटो Placeholder को रूपमा
+        const defaultPlaceholder = "https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/refs/heads/main/images/placeholder.png";
 
         async function fetchNews() {
             try {
@@ -314,7 +397,7 @@
                 render(allNews);
                 document.getElementById('loadStatus').innerText = `${allNews.length} समाचार`;
             } catch (e) {
-                document.getElementById('newsGrid').innerHTML = "Error loading feeds.";
+                document.getElementById('newsGrid').innerHTML = "<div class='p-5 text-center w-100 text-danger fw-bold'>समाचार लोड गर्न सकिएन। कृपया फ्रेस गर्नुहोस्।</div>";
             }
         }
 
@@ -329,15 +412,22 @@
 
         function render(items) {
             const grid = document.getElementById('newsGrid');
-            grid.innerHTML = items.length ? '' : '<div class="p-5 text-center w-100">कुनै समाचार भेटिएन।</div>';
-            
+            grid.innerHTML = items.length ? '' : '<div class="p-5 text-center w-100 text-muted">कुनै समाचार भेटिएन।</div>';
+                        
             items.forEach(item => {
-                const img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
+                // इमेज पत्ता लगाउने वा नभए defaultPlaceholder प्रयोग गर्ने
+                let img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
+                if (!img || img.includes("feed") || img.length < 10) {
+                    img = defaultPlaceholder;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'news-card';
                 card.onclick = () => openReader(item);
                 card.innerHTML = `
-                    ${img ? `<img src="${img}" class="card-img" onerror="this.style.display='none'">` : ''}
+                    <div class="card-img-container">
+                        <img src="${img}" class="card-img" onerror="this.src='${defaultPlaceholder}'">
+                    </div>
                     <div class="card-body">
                         <div class="source-badge">${item.source}</div>
                         <div class="news-title">${item.title}</div>
@@ -354,7 +444,7 @@
             document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('pageTitle').innerText = el.querySelector('.nav-text').innerText;
-            
+                        
             let filtered = allNews;
             if(type === 'Taaja') filtered = allNews.slice(0, 25);
             else if(type !== 'All') filtered = allNews.filter(n => n.topic === type);
@@ -373,9 +463,16 @@
             document.getElementById('rSource').innerText = item.source;
             document.getElementById('rBody').innerHTML = item.content || item.description;
             document.getElementById('rLink').href = item.link;
-            const img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
+            
+            let img = item.thumbnail || item.description.match(/src="([^"]+)"/)?.[1];
             const rImg = document.getElementById('rImg');
-            if(img) { rImg.src = img; rImg.style.display = 'block'; } else { rImg.style.display = 'none'; }
+            if(img) { 
+                rImg.src = img; 
+                rImg.style.display = 'block'; 
+            } else { 
+                rImg.src = defaultPlaceholder;
+                rImg.style.display = 'block';
+            }
             document.getElementById('readerOverlay').classList.add('active');
         }
 
@@ -384,7 +481,15 @@
         function toggleTheme() {
             const root = document.documentElement;
             const current = root.getAttribute('data-theme');
-            root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+            const target = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', target);
+            
+            const btn = document.getElementById('themeBtn');
+            if(target === 'dark') {
+                btn.innerHTML = `<i class="fas fa-sun me-2"></i> Light Mode`;
+            } else {
+                btn.innerHTML = `<i class="fas fa-moon me-2"></i> Dark Mode`;
+            }
         }
 
         function saveCurrent() {
@@ -392,7 +497,7 @@
             if(!saved.find(s => s.link === currentItem.link)) {
                 saved.push(currentItem);
                 localStorage.setItem('nepali_news_saved', JSON.stringify(saved));
-                alert('Saved!');
+                alert('समाचार सेभ गरियो!');
             }
         }
 
@@ -408,6 +513,5 @@
 
         window.onload = fetchNews;
     </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"b20fbb14051e4dad99d13f71779b4a7c","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e71de1b7bbc4f3c',t:'MTc3NTMyMjAwOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
