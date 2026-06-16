@@ -4,9 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>आजको समाचार</title>
+  
+  <!-- CSS Frameworks & Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- React & Babel CDNs (Allows React to run directly in a single HTML file) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
   <style>
     :root {
       --primary-color: #0052D4; 
@@ -16,25 +24,30 @@
       --surface-dark: #0E1113; 
       --card-bg-dark: #1C1F26;
     }
-    #splashScreen { 
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: #ffffff; z-index: 9999; display: flex; 
-        flex-direction: column; justify-content: center; align-items: center; 
+    #splashScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #ffffff; z-index: 9999; display: flex;
+      flex-direction: column; justify-content: center; align-items: center; 
     }
     #splashScreen img { width: 150px; animation: logoEntrance 1.5s ease-in-out forwards; }
-    @keyframes logoEntrance { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.1); opacity: 0; } }
-    
+    @keyframes logoEntrance { 
+      0% { transform: scale(0.8); opacity: 0; } 
+      50% { transform: scale(1); opacity: 1; } 
+      100% { transform: scale(1.1); opacity: 0; } 
+    }
     body { background: var(--surface-light); font-family: 'Outfit', sans-serif; color: var(--text-main-light); padding-bottom: 100px; transition: background 0.3s; overflow-x: hidden; }
     .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1040; padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
     .brand-name { font-family: 'Mukta', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0; }
-    #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; }
-    .carousel-item { height: 260px; background: #000; cursor: pointer; }
+    #newsCarousel { margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
+    .carousel-item { height: 260px; background: #000; cursor: pointer; display: none; }
+    .carousel-item.active { display: block; }
     .carousel-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
     .carousel-caption { text-align: left; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 25px 15px 15px 15px; width: 100%; margin: 0; }
     .carousel-caption h5 { font-family: 'Mukta'; font-weight: 700; font-size: 1.15rem; margin-bottom: 5px; line-height: 1.3; color: #fff; }
-    #categorySection { padding: 20px; display: none; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    #categorySection { padding: 20px; grid-template-columns: repeat(2, 1fr); gap: 15px; }
     .cat-tile { background: var(--card-bg-light); border-radius: 16px; padding: 25px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
-    .offcanvas { width: 280px !important; border: none !important; }
+    .offcanvas { width: 280px !important; border: none !important; position: fixed; bottom: 0; top: 0; left: 0; z-index: 1050; display: flex; flex-direction: column; max-width: 100%; background-color: #fff; transform: translateX(-100%); transition: transform .3s ease-in-out; }
+    .offcanvas.show { transform: none; }
     .nav-link-custom { padding: 15px 20px; border-radius: 12px; color: inherit; text-decoration: none; display: flex; align-items: center; margin-bottom: 5px; font-weight: 500; }
     .nav-link-custom i { width: 35px; color: var(--primary-color); font-size: 1.2rem; }
     .taja-card { background: var(--card-bg-light); padding: 15px; border-radius: 18px; margin-bottom: 15px; display: flex; gap: 15px; border-left: 4px solid var(--primary-color); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; align-items: center; }
@@ -45,74 +58,28 @@
     .nav-item.active { color: var(--primary-color); }
     .nav-item i { font-size: 1.3rem; }
     .nav-item span { font-size: 0.72rem; font-weight: 600; font-family: 'Mukta'; }
-    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; display: none; overflow-y: auto; }
+    #newsReader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg-light); z-index: 2000; overflow-y: auto; }
     .reader-header { position: sticky; top: 0; background: var(--card-bg-light); padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 2001; }
-    .dark-mode { background: var(--surface-dark); color: white; }
-    .dark-mode .app-header, .dark-mode #newsReader, .dark-mode .cat-tile, .dark-mode .taja-card, .dark-mode .offcanvas, .dark-mode .news-card { background: var(--card-bg-dark) !important; color: white !important; }
+    
+    .dark-mode { background: var(--surface-dark) !important; color: white !important; }
+    .dark-mode .app-header, .dark-mode #newsReader, .dark-mode .reader-header, .dark-mode .cat-tile, .dark-mode .taja-card, .dark-mode .offcanvas, .dark-mode .news-card { background: var(--card-bg-dark) !important; color: white !important; }
     .dark-mode .bottom-nav { background: rgba(28, 31, 38, 0.9) !important; }
     .dark-mode .taja-source { background: rgba(255, 255, 255, 0.1); color: #fff; }
-    .news-card { background: #fff; }
+    .dark-mode .news-card { background: var(--card-bg-dark); }
   </style>
 </head>
-<body onload="initApp()">
+<body>
 
-  <div id="splashScreen">
-    <img src="https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png" alt="Logo">
-  </div>
+  <div id="root"></div>
 
-  <header class="app-header">
-    <div onclick="openMenu()" style="cursor:pointer"><i class="fas fa-bars-staggered fa-lg"></i></div>
-    <h1 class="brand-name">आजको समाचार</h1>
-    <div onclick="toggleDarkMode()" style="cursor:pointer"><i id="darkModeIcon" class="fas fa-moon fa-lg"></i></div>
-  </header>
-
-  <main class="container-fluid p-0">
-    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner" id="carouselContent"></div>
-    </div>
-    <div id="categorySection" class="container">
-        <div class="cat-tile" onclick="filterByTopic('All')"><i class="fas fa-th-large mb-2 text-primary fs-2"></i><br><span>सबै</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Politics')"><i class="fas fa-landmark mb-2 text-primary fs-2"></i><br><span>राजनीति</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Sports')"><i class="fas fa-trophy mb-2 text-primary fs-2"></i><br><span>खेलकुद</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Tech')"><i class="fas fa-microchip mb-2 text-primary fs-2"></i><br><span>प्रविधि</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Entertainment')"><i class="fas fa-film mb-2 text-primary fs-2"></i><br><span>मनोरञ्जन</span></div>
-        <div class="cat-tile" onclick="filterByTopic('Economy')"><i class="fas fa-chart-line mb-2 text-primary fs-2"></i><br><span>अर्थतन्त्र</span></div>
-    </div>
-    <div id="newsContainer" class="container pt-2"></div>
-  </main>
-
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-    <div class="offcanvas-header"><h5 class="brand-name">मेनु</h5><button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button></div>
-    <div class="offcanvas-body p-0">
-      <a href="https://aajakosamachar.ayushacharya5.com.np/app/about.html" class="nav-link-custom mx-3"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
-      <a href="https://aajakosamachar.ayushacharya5.com.np/app/support.html" class="nav-link-custom mx-3"><i class="fas fa-headset"></i> सहयोग</a>
-    </div>
-  </div>
-
-  <div id="newsReader">
-    <div class="reader-header">
-      <button class="btn border-0 rounded-circle me-2" onclick="window.history.back()"><i class="fas fa-arrow-left fs-5"></i></button>
-      <span class="fw-bold flex-grow-1">पढ्नुहोस्</span>
-      <button class="btn border-0" id="saveBtnInReader" onclick="toggleSaveCurrent()"><i id="bookmarkIcon" class="far fa-bookmark fs-4"></i></button>
-    </div>
-    <div class="reader-content p-3">
-      <h2 id="rTitle" class="fw-bold mb-3" style="font-family:'Mukta'"></h2>
-      <img id="rImg" class="w-100 rounded mb-3" src="" style="display:none">
-      <div id="rBody" style="font-family:'Mukta'; font-size:1.15rem; line-height:1.8; white-space: pre-wrap;"></div>
-      <a id="rLink" href="" target="_blank" class="btn btn-primary w-100 mt-4 py-3 rounded-pill fw-bold">पूरा स्रोतमा पढ्नुहोस्</a>
-    </div>
-  </div>
-
-  <nav class="bottom-nav">
-    <button class="nav-item active" id="homeTab" onclick="loadNews()"><i class="fas fa-house"></i><span>होम</span></button>
-    <button class="nav-item" id="catTab" onclick="showCategoryMenu()"><i class="fas fa-grip-vertical"></i><span>विधा</span></button>
-    <button class="nav-item" id="tajaTab" onclick="showTaja()"><i class="fas fa-fire-alt"></i><span>ताजा</span></button>
-    <button class="nav-item" id="saveTab" onclick="renderSaved()"><i class="fas fa-bookmark"></i><span>सेभ</span></button>
-  </nav>
-
+  <!-- JS Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const feeds = [
+
+  <!-- React Logic Engine Script Layout -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const FEEDS = [
       { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
       { name: "Setopati", url: "https://setopati.com/feed" },
       { name: "Ratopati", url: "https://www.ratopati.com/feed" },
@@ -137,131 +104,296 @@
       { name: "Baahrakhari", url: "https://baahrakhari.com/feed" },
     ];
 
-    let allNews = [], currentNewsItem = null, sidebarInstance = null;
-
     function cleanSourceName(name) {
-        const n = name.toLowerCase();
-        if (n.includes('onlinekhabar')) return 'अनलाइनखबर';
-        if (n.includes('setopati')) return 'सेतोपाटी';
-        if (n.includes('ratopati')) return 'रातोपाटी';
-        if (n.includes('nepalkhabar')) return 'नेपालखबर';
-        if (n.includes('ourbiratnagar') || n.includes('biratnagar')) return 'हाम्रो विराटनगर';
-        if (n.includes('kantipur')) return 'कान्तिपुर';
-        let parts = name.split(' ');
-        return parts.length > 1 ? parts[0] + ' ' + parts[1] : parts[0];
+      const n = name.toLowerCase();
+      if (n.includes('onlinekhabar')) return 'अनलाइनखबर';
+      if (n.includes('setopati')) return 'सेतोपाटी';
+      if (n.includes('ratopati')) return 'रातोपाटी';
+      if (n.includes('nepalkhabar')) return 'नेपालखबर';
+      if (n.includes('ourbiratnagar') || n.includes('biratnagar')) return 'हाम्रो विराटनगर';
+      if (n.includes('kantipur')) return 'कान्तिपुर';
+      let parts = name.split(' ');
+      return parts.length > 1 ? parts[0] + ' ' + parts[1] : parts[0];
     }
 
-    // UPDATED: Logic to show splash screen only once per session
-    function initApp() {
-      sidebarInstance = new bootstrap.Offcanvas(document.getElementById('sidebarMenu'));
-      window.onpopstate = () => { document.getElementById('newsReader').style.display = 'none'; };
-
-      const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
-
-      if (hasSeenSplash) {
-        // Skip splash screen
-        document.getElementById('splashScreen').style.display = 'none';
-        loadNews();
-      } else {
-        // Show splash screen, then mark as seen
-        setTimeout(() => {
-          document.getElementById('splashScreen').style.display = 'none';
-          sessionStorage.setItem('hasSeenSplash', 'true');
-          loadNews();
-        }, 1500);
-      }
+    function getTopic(title) {
+      if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
+      if (/राजनीति|नेता|सरकार/i.test(title)) return 'Politics';
+      if (/प्रविधि|मोबाइल|इन्टरनेट/i.test(title)) return 'Tech';
+      if (/फिल्म|मनोरञ्जन|कलाकार/i.test(title)) return 'Entertainment';
+      if (/बैंक|अर्थ|बजार|शेयर/i.test(title)) return 'Economy';
+      return 'General';
     }
 
-    function getImageUrl(item) { return item.thumbnail || item.enclosure?.link || (item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1]) || null; }
-
-    async function loadNews() {
-      setActiveTab('homeTab'); toggleView('news');
-      const container = document.getElementById('newsContainer');
-      container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
-      try {
-        const results = await Promise.all(feeds.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json())));
-        allNews = results.flatMap(data => (data.items || []).map(item => ({...item, sourceName: cleanSourceName(data.feed.title || data.feed.name), topic: getTopic(item.title)})));
-        allNews.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-        const newsWithImages = allNews.filter(n => getImageUrl(n));
-        document.getElementById('newsCarousel').style.display = 'block';
-        document.getElementById('carouselContent').innerHTML = newsWithImages.slice(0, 5).map((item, idx) => `
-            <div class="carousel-item ${idx === 0 ? 'active' : ''}" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'><img src="${getImageUrl(item)}"><div class="carousel-caption"><h5>${item.title}</h5></div></div>`).join('');
-        renderList(allNews.slice(5));
-      } catch (e) { container.innerHTML = "विवरण लोड भएन।"; }
+    // Components
+    function SplashScreen() {
+      return (
+        <div id="splashScreen">
+          <img src="https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png" alt="Logo" />
+        </div>
+      );
     }
 
-    function renderList(list) {
-      document.getElementById('newsContainer').innerHTML = list.map(item => `
-        <div class="news-card border-0 shadow-sm mb-3 rounded-4 overflow-hidden" style="cursor:pointer" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-          ${getImageUrl(item) ? `<img src="${getImageUrl(item)}" class="w-100" style="height:200px; object-fit:cover;">` : ''}
-          <div class="p-3"><span class="badge bg-primary mb-2">${item.sourceName}</span><div class="fw-bold" style="font-family:'Mukta'; font-size:1.15rem;">${item.title}</div></div>
-        </div>`).join('');
+    function Header({ onMenuOpen, darkMode, onToggleDark }) {
+      return (
+        <header className="app-header">
+          <div onClick={onMenuOpen} style={{ cursor: 'pointer' }}><i className="fas fa-bars-staggered fa-lg"></i></div>
+          <h1 className="brand-name">आजको समाचार</h1>
+          <div onClick={onToggleDark} style={{ cursor: 'pointer' }}><i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'} fa-lg`}></i></div>
+        </header>
+      );
     }
 
-    function openReader(item) {
-      currentNewsItem = item;
-      history.pushState({page: 'reader'}, '');
-      document.getElementById('rTitle').innerText = item.title;
-      document.getElementById('rImg').src = getImageUrl(item) || '';
-      document.getElementById('rImg').style.display = getImageUrl(item) ? 'block' : 'none';
-      let temp = document.createElement("div"); temp.innerHTML = item.content || item.description || "";
-      document.getElementById('rBody').innerText = temp.textContent || temp.innerText;
-      document.getElementById('rLink').href = item.link;
-      const saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-      const isSaved = saved.some(n => n.link === item.link);
-      document.getElementById('bookmarkIcon').className = isSaved ? 'fas fa-bookmark fs-4 text-primary' : 'far fa-bookmark fs-4';
-      document.getElementById('newsReader').style.display = 'block';
+    function Sidebar({ isOpen, onClose }) {
+      return (
+        <>
+          {isOpen && <div className="offcanvas-backdrop fade show" onClick={onClose}></div>}
+          <div className={`offcanvas offcanvas-start ${isOpen ? 'show' : ''}`} style={{ visibility: isOpen ? 'visible' : 'hidden' }}>
+            <div className="offcanvas-header">
+              <h5 className="brand-name">मेनु</h5>
+              <button type="button" className="btn-close text-reset" onClick={onClose}></button>
+            </div>
+            <div className="offcanvas-body p-0">
+              <a href="https://aajakosamachar.ayushacharya5.com.np/app/about.html" className="nav-link-custom mx-3"><i class="fas fa-info-circle"></i> हाम्रो बारेमा</a>
+              <a href="https://aajakosamachar.ayushacharya5.com.np/app/support.html" className="nav-link-custom mx-3"><i class="fas fa-headset"></i> सहयोग</a>
+            </div>
+          </div>
+        </>
+      );
     }
 
-    function toggleSaveCurrent() {
-      if (!currentNewsItem) return;
-      let saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-      const index = saved.findIndex(n => n.link === currentNewsItem.link);
-      if (index > -1) { saved.splice(index, 1); document.getElementById('bookmarkIcon').className = 'far fa-bookmark fs-4'; } 
-      else { saved.push(currentNewsItem); document.getElementById('bookmarkIcon').className = 'fas fa-bookmark fs-4 text-primary'; }
-      localStorage.setItem('savedNews', JSON.stringify(saved));
+    function CarouselSection({ items, onSelect }) {
+      const [activeIndex, setActiveIndex] = useState(0);
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setActiveIndex((prev) => (prev + 1) % items.length);
+        }, 4000);
+        return () => clearInterval(interval);
+      }, [items.length]);
+
+      return (
+        <div id="newsCarousel" className="carousel slide">
+          <div className="carousel-inner">
+            {items.map((item, idx) => {
+              const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
+              return (
+                <div key={idx} className={`carousel-item ${idx === activeIndex ? 'active' : ''}`} onClick={() => onSelect(item)}>
+                  <img src={img} alt="" />
+                  <div className="carousel-caption"><h5>{item.title}</h5></div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
     }
 
-    function renderSaved() {
-      setActiveTab('saveTab'); toggleView('news');
-      document.getElementById('newsCarousel').style.display = 'none';
-      document.getElementById('categorySection').style.display = 'none';
-      const saved = JSON.parse(localStorage.getItem('savedNews') || '[]');
-      if (saved.length === 0) { document.getElementById('newsContainer').innerHTML = '<div class="text-center p-5 opacity-50">कुनै समाचार सेभ गरिएको छैन।</div>'; } 
-      else { renderList(saved); }
+    function CategorySection({ onSelectTopic }) {
+      const cats = [
+        { id: 'All', label: 'सबै', icon: 'fas fa-th-large' },
+        { id: 'Politics', label: 'राजनीति', icon: 'fas fa-landmark' },
+        { id: 'Sports', label: 'खेलकुद', icon: 'fas fa-trophy' },
+        { id: 'Tech', label: 'प्रविधि', icon: 'fas fa-microchip' },
+        { id: 'Entertainment', label: 'मनोरञ्जन', icon: 'fas fa-film' },
+        { id: 'Economy', label: 'अर्थतन्त्र', icon: 'fas fa-chart-line' },
+      ];
+      return (
+        <div id="categorySection" style={{ display: 'grid' }}>
+          {cats.map(c => (
+            <div key={c.id} className="cat-tile" onClick={() => onSelectTopic(c.id)}>
+              <i className={`${c.icon} mb-2 text-primary fs-2`}></i><br /><span>{c.label}</span>
+            </div>
+          ))}
+        </div>
+      );
     }
 
-    function showTaja() {
-      setActiveTab('tajaTab'); toggleView('news');
-      document.getElementById('newsCarousel').style.display = 'none';
-      document.getElementById('categorySection').style.display = 'none';
-      document.getElementById('newsContainer').innerHTML = allNews.slice(0, 30).map(item => {
-        return `<div class="taja-card" onclick='openReader(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                  <div class="taja-source">${item.sourceName}</div>
-                  <div class="taja-title">${item.title}</div>
-                </div>`;
-      }).join('');
+    function NewsCard({ item, onClick }) {
+      const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1] || null;
+      return (
+        <div className="news-card border-0 shadow-sm mb-3 rounded-4 overflow-hidden" style={{ cursor: 'pointer' }} onClick={onClick}>
+          {img && <img src={img} className="w-100" style={{ height: '200px', objectFit: 'cover' }} alt="" />}
+          <div className="p-3">
+            <span className="badge bg-primary mb-2">{item.sourceName}</span>
+            <div className="fw-bold" style={{ fontFamily: "'Mukta'", fontSize: '1.15rem' }}>{item.title}</div>
+          </div>
+        </div>
+      );
     }
 
-    function getTopic(t) {
-         if (/खेल|क्रिकेट|फुटबल/i.test(t)) return 'Sports';
-         if (/राजनीति|नेता|सरकार/i.test(t)) return 'Politics';
-         if (/प्रविधि|मोबाइल|इन्टरनेट/i.test(t)) return 'Tech';
-         if (/फिल्म|मनोरञ्जन|कलाकार/i.test(t)) return 'Entertainment';
-         if (/बैंक|अर्थ|बजार|शेयर/i.test(t)) return 'Economy';
-         return 'General';
-     }
+    function NewsReader({ item, savedNews, onClose, onToggleSave }) {
+      const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1] || null;
+      const isSaved = savedNews.some(n => n.link === item.link);
 
-    function toggleView(v) {
-         document.getElementById('categorySection').style.display = (v === 'category') ? 'grid' : 'none';
-         document.getElementById('newsContainer').style.display = (v === 'news') ? 'block' : 'none';
-     }
+      const getCleanBody = () => {
+        const temp = document.createElement("div");
+        temp.innerHTML = item.content || item.description || "";
+        return temp.textContent || temp.innerText || "";
+      };
 
-    function showCategoryMenu() { setActiveTab('catTab'); toggleView('category'); document.getElementById('newsCarousel').style.display = 'none'; }
-    function filterByTopic(topic) { setActiveTab('catTab'); toggleView('news'); const filtered = (topic === 'All') ? allNews : allNews.filter(n => n.topic === topic); renderList(filtered); }
-    function setActiveTab(id) { document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); document.getElementById('darkModeIcon').className = document.body.classList.contains('dark-mode') ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg'; }
-    function openMenu() { sidebarInstance.show(); }
+      return (
+        <div id="newsReader">
+          <div className="reader-header">
+            <button className="btn border-0 rounded-circle me-2" onClick={onClose}><i className="fas fa-arrow-left fs-5"></i></button>
+            <span className="fw-bold flex-grow-1">पढ्नुहोस्</span>
+            <button className="btn border-0" onClick={() => onToggleSave(item)}>
+              <i className={`${isSaved ? 'fas text-primary' : 'far'} fa-bookmark fs-4`}></i>
+            </button>
+          </div>
+          <div className="reader-content p-3">
+            <h2 className="fw-bold mb-3" style={{ fontFamily: "'Mukta'" }}>{item.title}</h2>
+            {img && <img className="w-100 rounded mb-3" src={img} alt="" />}
+            <div style={{ fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{getCleanBody()}</div>
+            <a href={item.link} target="_blank" rel="noreferrer" className="btn btn-primary w-100 mt-4 py-3 rounded-pill fw-bold">पूरा स्रोतमा पढ्नुहोस्</a>
+          </div>
+        </div>
+      );
+    }
+
+    function BottomNav({ activeView, onViewChange }) {
+      const tabs = [
+        { id: 'home', label: 'होम', icon: 'fas fa-house' },
+        { id: 'categories', label: 'विधा', icon: 'fas fa-grip-vertical' },
+        { id: 'taja', label: 'ताजा', icon: 'fas fa-fire-alt' },
+        { id: 'saved', label: 'सेभ', icon: 'fas fa-bookmark' },
+      ];
+      return (
+        <nav className="bottom-nav">
+          {tabs.map(t => (
+            <button key={t.id} className={`nav-item ${activeView === t.id ? 'active' : ''}`} onClick={() => onViewChange(t.id)}>
+              <i className={t.icon}></i><span>{t.label}</span>
+            </button>
+          ))}
+        </nav>
+      );
+    }
+
+    // App Core Main
+    function App() {
+      const [allNews, setAllNews] = useState([]);
+      const [displayedNews, setDisplayedNews] = useState([]);
+      const [savedNews, setSavedNews] = useState(() => JSON.parse(localStorage.getItem('savedNews') || '[]'));
+      const [currentView, setCurrentView] = useState('home');
+      const [selectedNews, setSelectedNews] = useState(null);
+      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+      const [darkMode, setDarkMode] = useState(false);
+      const [loading, setLoading] = useState(true);
+      const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('hasSeenSplash'));
+
+      useEffect(() => {
+        document.body.classList.toggle('dark-mode', darkMode);
+      }, [darkMode]);
+
+      useEffect(() => {
+        if (showSplash) {
+          const t = setTimeout(() => {
+            setShowSplash(false);
+            sessionStorage.setItem('hasSeenSplash', 'true');
+            fetchNews();
+          }, 1500);
+          return () => clearTimeout(t);
+        } else {
+          fetchNews();
+        }
+      }, [showSplash]);
+
+      const fetchNews = async () => {
+        setLoading(true);
+        try {
+          const results = await Promise.all(
+            FEEDS.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json()))
+          );
+          const items = results.flatMap(data => 
+            (data.items || []).map(item => ({
+              ...item,
+              sourceName: cleanSourceName(data.feed.title || data.feed.name),
+              topic: getTopic(item.title)
+            }))
+          );
+          items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+          setAllNews(items);
+          setDisplayedNews(items);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const toggleSaveNews = (item) => {
+        let updated = savedNews.some(n => n.link === item.link) 
+          ? savedNews.filter(n => n.link !== item.link) 
+          : [...savedNews, item];
+        setSavedNews(updated);
+        localStorage.setItem('savedNews', JSON.stringify(updated));
+      };
+
+      const filterByTopic = (topic) => {
+        setDisplayedNews(topic === 'All' ? allNews : allNews.filter(n => n.topic === topic));
+        setCurrentView('home');
+      };
+
+      if (showSplash) return <SplashScreen />;
+
+      const carouselItems = displayedNews.filter(n => n.thumbnail || n.enclosure?.link).slice(0, 5);
+      const remainingNews = displayedNews.slice(5);
+
+      return (
+        <div>
+          <Header onMenuOpen={() => setIsSidebarOpen(true)} darkMode={darkMode} onToggleDark={() => setDarkMode(!darkMode)} />
+          <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+          
+          <main className="container-fluid p-0">
+            {loading ? (
+              <div className="text-center p-5"><div className="spinner-border text-primary"></div></div>
+            ) : (
+              <>
+                {currentView === 'categories' && <CategorySection onSelectTopic={filterByTopic} />}
+                
+                {currentView === 'taja' && (
+                  <div className="container pt-3">
+                    {allNews.slice(0, 30).map((item, i) => (
+                      <div key={i} className="taja-card" onClick={() => setSelectedNews(item)}>
+                        <div className="taja-source">{item.sourceName}</div>
+                        <div className="taja-title">{item.title}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {currentView === 'saved' && (
+                  <div className="container pt-3">
+                    {savedNews.length === 0 ? (
+                      <div className="text-center p-5 opacity-50">कुनै समाचार सेभ गरिएको छैन।</div>
+                    ) : (
+                      savedNews.map((item, i) => <NewsCard key={i} item={item} onClick={() => setSelectedNews(item)} />)
+                    )}
+                  </div>
+                )}
+
+                {currentView === 'home' && (
+                  <>
+                    {carouselItems.length > 0 && <CarouselSection items={carouselItems} onSelect={setSelectedNews} />}
+                    <div className="container pt-2">
+                      {remainingNews.map((item, i) => <NewsCard key={i} item={item} onClick={() => setSelectedNews(item)} />)}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </main>
+
+          {selectedNews && (
+            <NewsReader item={selectedNews} savedNews={savedNews} onClose={() => setSelectedNews(null)} onToggleSave={toggleSaveNews} />
+          )}
+
+          <BottomNav activeView={currentView} onViewChange={setCurrentView} />
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
