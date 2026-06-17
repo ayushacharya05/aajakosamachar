@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- React Production CDNs -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
@@ -186,7 +185,7 @@
 
     function getTopic(title) {
       if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
-      if (/राजनीति|नेता|सरकार|संसद/i.test(title)) return 'Politics';
+      if (/राजनीiti|नेता|सरकार|संसद/i.test(title)) return 'Politics';
       if (/प्रविधि|मोबाइल|इन्टरनेट|इलेक्ट्रोनिक्स/i.test(title)) return 'Tech';
       if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो/i.test(title)) return 'Entertainment';
       if (/बैंक|अर्थ|बजार|शेयर|पूंजी/i.test(title)) return 'Economy';
@@ -209,7 +208,6 @@
       const [showNotifBanner, setShowNotifBanner] = useState(false);
       const lastTrackedLink = useRef(localStorage.getItem('lastTrackedLink') || '');
 
-      // Refs to prevent recursive state loop during back history pops
       const isInternalHistoryChange = useRef(false);
 
       useEffect(() => {
@@ -217,11 +215,16 @@
         localStorage.setItem('darkMode', darkMode);
       }, [darkMode]);
 
+      // Handle structural loading processes
       useEffect(() => {
         if (showSplash) {
           const t = setTimeout(() => {
             setShowSplash(false);
             sessionStorage.setItem('hasSeenSplash', 'true');
+            
+            // CRITICAL GESTURE REPAIR: Inject initial history track immediately when splash closes
+            window.history.pushState({ view: 'home', hasModal: false }, '');
+            
             fetchNews();
           }, 1600);
           return () => clearTimeout(t);
@@ -230,20 +233,19 @@
         }
       }, [showSplash]);
 
-      // --- Android Swipe/Back Button Intercept Logic ---
+      // Hardware back button gesture routing manager
       useEffect(() => {
         const handleHardwareBackSwipe = (event) => {
           if (isInternalHistoryChange.current) return;
 
-          // If news reader modal is open, close it on back swipe instead of closing app
           if (selectedNews) {
+            // Close active news content view on back swipe
             setSelectedNews(null);
-            // Re-push a fresh base state so the next swipe doesn't immediately exit the app either
             isInternalHistoryChange.current = true;
             window.history.pushState({ view: currentView, hasModal: false }, '');
             isInternalHistoryChange.current = false;
           } else if (currentView !== 'home') {
-            // If viewing category or saved lists, drop back to home screen cleanly
+            // Route secondary menu tracks back to home layout on back swipe
             setCurrentView('home');
             window.scrollTo(0, 0);
             isInternalHistoryChange.current = true;
@@ -253,14 +255,9 @@
         };
 
         window.addEventListener('popstate', handleHardwareBackSwipe);
-        
-        // Push initial state to trap the first swipe event safely
-        window.history.replaceState({ view: currentView, hasModal: !!selectedNews }, '');
-        
         return () => window.removeEventListener('popstate', handleHardwareBackSwipe);
       }, [selectedNews, currentView]);
 
-      // Wrapper state setter for open views to push fresh system history snapshots
       const updateNewsReaderTarget = (newsItem) => {
         setSelectedNews(newsItem);
         if (newsItem) {
@@ -278,7 +275,7 @@
         isInternalHistoryChange.current = false;
       };
 
-      // Dynamic Silent Polling Engine
+      // Background news polling configuration
       useEffect(() => {
         const structuralInterval = setInterval(() => {
           fetchNews(true); 
@@ -304,7 +301,7 @@
           playTone(523.25, now, 0.15); 
           playTone(659.25, now + 0.1, 0.3); 
         } catch(e) {
-          console.log("Audio settings blocked");
+          console.log("Audio contextual connection pending initialization");
         }
       };
 
@@ -350,7 +347,7 @@
             setDisplayedNews(items);
           }
         } catch (err) {
-          console.error("Error linking to remote feeds matrix:", err);
+          console.error("Error establishing link to feed array infrastructure:", err);
         } finally {
           if (!isSilentPoll) setLoading(false);
         }
@@ -365,7 +362,7 @@
               url: item.link,
             });
           } catch (err) {
-            console.log('Sharing layer closed');
+            console.log('Sharing matrix closed securely');
           }
         } else {
           window.open(item.link, '_blank');
