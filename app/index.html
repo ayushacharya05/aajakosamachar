@@ -205,10 +205,12 @@
       const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('hasSeenSplash'));
       const [carouselIndex, setCarouselIndex] = useState(0);
       
-      // In-App Notification Hook states
       const [activeNotification, setActiveNotification] = useState(null);
       const [showNotifBanner, setShowNotifBanner] = useState(false);
       const lastTrackedLink = useRef(localStorage.getItem('lastTrackedLink') || '');
+
+      // Refs to prevent recursive state loop during back history pops
+      const isInternalHistoryChange = useRef(false);
 
       useEffect(() => {
         document.body.classList.toggle('dark-mode', darkMode);
@@ -228,7 +230,55 @@
         }
       }, [showSplash]);
 
-      // Dynamic Silent Polling Engine - background checks for feed fresh status every 60 seconds
+      // --- Android Swipe/Back Button Intercept Logic ---
+      useEffect(() => {
+        const handleHardwareBackSwipe = (event) => {
+          if (isInternalHistoryChange.current) return;
+
+          // If news reader modal is open, close it on back swipe instead of closing app
+          if (selectedNews) {
+            setSelectedNews(null);
+            // Re-push a fresh base state so the next swipe doesn't immediately exit the app either
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: currentView, hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          } else if (currentView !== 'home') {
+            // If viewing category or saved lists, drop back to home screen cleanly
+            setCurrentView('home');
+            window.scrollTo(0, 0);
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: 'home', hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          }
+        };
+
+        window.addEventListener('popstate', handleHardwareBackSwipe);
+        
+        // Push initial state to trap the first swipe event safely
+        window.history.replaceState({ view: currentView, hasModal: !!selectedNews }, '');
+        
+        return () => window.removeEventListener('popstate', handleHardwareBackSwipe);
+      }, [selectedNews, currentView]);
+
+      // Wrapper state setter for open views to push fresh system history snapshots
+      const updateNewsReaderTarget = (newsItem) => {
+        setSelectedNews(newsItem);
+        if (newsItem) {
+          isInternalHistoryChange.current = true;
+          window.history.pushState({ view: currentView, hasModal: true }, '');
+          isInternalHistoryChange.current = false;
+        }
+      };
+
+      const updateActiveViewTarget = (viewName) => {
+        setCurrentView(viewName);
+        window.scrollTo(0, 0);
+        isInternalHistoryChange.current = true;
+        window.history.pushState({ view: viewName, hasModal: false }, '');
+        isInternalHistoryChange.current = false;
+      };
+
+      // Dynamic Silent Polling Engine
       useEffect(() => {
         const structuralInterval = setInterval(() => {
           fetchNews(true); 
@@ -238,7 +288,6 @@
 
       const playNotificationSound = () => {
         try {
-          // Native clean digital chime array sequence code
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const playTone = (freq, startTime, duration) => {
             const osc = audioCtx.createOscillator();
@@ -252,10 +301,10 @@
             osc.stop(startTime + duration);
           };
           const now = audioCtx.currentTime;
-          playTone(523.25, now, 0.15); // C5 note tone
-          playTone(659.25, now + 0.1, 0.3); // E5 note tone
+          playTone(523.25, now, 0.15); 
+          playTone(659.25, now + 0.1, 0.3); 
         } catch(e) {
-          console.log("Audio contexts pending user interaction register");
+          console.log("Audio settings blocked");
         }
       };
 
@@ -263,8 +312,6 @@
         setActiveNotification(newsItem);
         setShowNotifBanner(true);
         playNotificationSound();
-        
-        // Push banner collapse timer logic
         setTimeout(() => {
           setShowNotifBanner(false);
         }, 6000); 
@@ -290,7 +337,6 @@
 
           items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
           
-          // Verify if structural data contains an updated head link item
           if (items.length > 0) {
             if (lastTrackedLink.current && lastTrackedLink.current !== items[0].link) {
               triggerInAppAlert(items[0]);
@@ -319,7 +365,7 @@
               url: item.link,
             });
           } catch (err) {
-            console.log('Native sharing sheet closed');
+            console.log('Sharing layer closed');
           }
         } else {
           window.open(item.link, '_blank');
@@ -354,10 +400,9 @@
       }
 
       return e('div', null,
-        // Drop-down Hardware In-App Banner Notification Wrapper
         e('div', { 
           className: `in-app-notification ${showNotifBanner ? 'show' : ''}`,
-          onClick: () => { setSelectedNews(activeNotification); setShowNotifBanner(false); }
+          onClick: () => { updateNewsReaderTarget(activeNotification); setShowNotifBanner(false); }
         },
           e('img', { className: 'notif-icon', src: 'https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png' }),
           e('div', { className: 'notif-body' },
@@ -397,13 +442,13 @@
                 { id: 'Tech', label: 'प्रविधि', icon: 'fas fa-microchip' },
                 { id: 'Entertainment', label: 'मनोरञ्जन', icon: 'fas fa-film' },
                 { id: 'Economy', label: 'अर्थतन्त्र', icon: 'fas fa-chart-line' }
-              ].map(c => e('div', { key: c.id, className: 'cat-tile', onClick: () => { setDisplayedNews(c.id === 'All' ? allNews : allNews.filter(n => n.topic === c.id)); setCurrentView('home'); } },
+              ].map(c => e('div', { key: c.id, className: 'cat-tile', onClick: () => { setDisplayedNews(c.id === 'All' ? allNews : allNews.filter(n => n.topic === c.id)); updateActiveViewTarget('home'); } },
                 e('i', { className: `${c.icon} mb-3 text-primary fs-3` }), e('br'), e('span', { className: 'fw-bold', style: { fontFamily: "'Mukta'" } }, c.label)
               ))
             ),
 
             currentView === 'taja' && e('div', { className: 'container pt-3' },
-              allNews.slice(0, 40).map((item, i) => e('div', { key: i, className: 'taja-card', onClick: () => setSelectedNews(item) },
+              allNews.slice(0, 40).map((item, i) => e('div', { key: i, className: 'taja-card', onClick: () => updateNewsReaderTarget(item) },
                 e('div', { className: 'taja-source' }, item.sourceName),
                 e('div', { className: 'taja-title' }, item.title)
               ))
@@ -413,7 +458,7 @@
               savedNews.length === 0 ? e('div', { className: 'text-center p-5 opacity-50 fw-bold' }, 'कुनै समाचार सेभ गरिएको छैन।') :
               savedNews.map((item, i) => {
                 const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
-                return e('div', { key: i, className: 'news-card', onClick: () => setSelectedNews(item) },
+                return e('div', { key: i, className: 'news-card', onClick: () => updateNewsReaderTarget(item) },
                   img && e('img', { src: img, className: 'w-100', style: { height: '210px', objectFit: 'cover' } }),
                   e('div', { className: 'p-3' }, e('span', { className: 'badge bg-primary mb-2 rounded-2' }, item.sourceName), e('div', { className: 'fw-bold', style: { fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: '1.45' } }, item.title))
                 );
@@ -425,7 +470,7 @@
                 e('div', { className: 'carousel-inner' },
                   carouselItems.map((item, idx) => {
                     const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
-                    return e('div', { key: idx, className: `carousel-item ${idx === carouselIndex ? 'active' : ''}`, onClick: () => setSelectedNews(item) },
+                    return e('div', { key: idx, className: `carousel-item ${idx === carouselIndex ? 'active' : ''}`, onClick: () => updateNewsReaderTarget(item) },
                       e('img', { src: img }),
                       e('div', { className: 'carousel-caption' }, e('h5', null, item.title))
                     );
@@ -435,7 +480,7 @@
               e('div', { className: 'container pt-2' },
                 remainingNews.map((item, i) => {
                   const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
-                  return e('div', { key: i, className: 'news-card', onClick: () => setSelectedNews(item) },
+                  return e('div', { key: i, className: 'news-card', onClick: () => updateNewsReaderTarget(item) },
                     img && e('img', { src: img, className: 'w-100', style: { height: '210px', objectFit: 'cover' } }),
                     e('div', { className: 'p-3' }, e('span', { className: 'badge bg-primary mb-2 rounded-2' }, item.sourceName), e('div', { className: 'fw-bold', style: { fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: '1.45' } }, item.title))
                   );
@@ -455,7 +500,7 @@
 
           return e('div', { id: 'newsReader' },
             e('div', { className: 'reader-header' },
-              e('button', { className: 'btn border-0 rounded-circle me-2', onClick: () => setSelectedNews(null) }, e('i', { className: 'fas fa-arrow-left fs-5' })),
+              e('button', { className: 'btn border-0 rounded-circle me-2', onClick: () => window.history.back() }, e('i', { className: 'fas fa-arrow-left fs-5' })),
               e('span', { className: 'fw-bold flex-grow-1' }, selectedNews.sourceName),
               e('button', { className: 'btn border-0 me-1', onClick: () => handleShare(selectedNews) }, e('i', { className: 'fas fa-share-nodes fs-5' })),
               e('button', { className: 'btn border-0', onClick: () => {
@@ -481,7 +526,7 @@
             { id: 'categories', label: 'विधा', icon: 'fas fa-grip-vertical' },
             { id: 'taja', label: 'ताजा', icon: 'fas fa-fire-alt' },
             { id: 'saved', label: 'सेभ', icon: 'fas fa-bookmark' }
-          ].map(t => e('button', { key: t.id, className: `nav-item ${currentView === t.id ? 'active' : ''}`, onClick: () => { setCurrentView(t.id); window.scrollTo(0, 0); } },
+          ].map(t => e('button', { key: t.id, className: `nav-item ${currentView === t.id ? 'active' : ''}`, onClick: () => updateActiveViewTarget(t.id) },
             e('i', { className: t.icon }), e('span', null, t.label)
           ))
         )
