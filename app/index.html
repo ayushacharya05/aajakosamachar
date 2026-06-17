@@ -47,7 +47,7 @@
     #splashScreen img { width: 130px; animation: logoEntrance 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
     @keyframes logoEntrance { 
-      0% { transform: scale(0.85); opacity: 0; } 
+      0 { transform: scale(0.85); opacity: 0; } 
       35% { transform: scale(1); opacity: 1; } 
       75% { transform: scale(1); opacity: 1; filter: blur(0px); }
       100% { transform: scale(1.05); opacity: 0; filter: blur(4px); } 
@@ -185,10 +185,10 @@
 
     function getTopic(title) {
       if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
-      if (/राजनीiti|नेता|सरकार|संसद/i.test(title)) return 'Politics';
+      if (/राजनीति|नेता|सरकार|संसद|मन्त्री/i.test(title)) return 'Politics'; // Fixed mix of English/Nepali character match
       if (/प्रविधि|मोबाइल|इन्टरनेट|इलेक्ट्रोनिक्स/i.test(title)) return 'Tech';
-      if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो/i.test(title)) return 'Entertainment';
-      if (/बैंक|अर्थ|बजार|शेयर|पूंजी/i.test(title)) return 'Economy';
+      if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो|सिनेमा/i.test(title)) return 'Entertainment';
+      if (/बैंक|अर्थ|बजार|शेयर|पूंजी|बजेट/i.test(title)) return 'Economy';
       return 'General';
     }
 
@@ -215,16 +215,12 @@
         localStorage.setItem('darkMode', darkMode);
       }, [darkMode]);
 
-      // Handle structural loading processes
       useEffect(() => {
         if (showSplash) {
           const t = setTimeout(() => {
             setShowSplash(false);
             sessionStorage.setItem('hasSeenSplash', 'true');
-            
-            // CRITICAL GESTURE REPAIR: Inject initial history track immediately when splash closes
             window.history.pushState({ view: 'home', hasModal: false }, '');
-            
             fetchNews();
           }, 1600);
           return () => clearTimeout(t);
@@ -233,19 +229,18 @@
         }
       }, [showSplash]);
 
-      // Hardware back button gesture routing manager
       useEffect(() => {
         const handleHardwareBackSwipe = (event) => {
           if (isInternalHistoryChange.current) return;
 
           if (selectedNews) {
-            // Close active news content view on back swipe
             setSelectedNews(null);
             isInternalHistoryChange.current = true;
             window.history.pushState({ view: currentView, hasModal: false }, '');
             isInternalHistoryChange.current = false;
           } else if (currentView !== 'home') {
-            // Route secondary menu tracks back to home layout on back swipe
+            // Revert filter list on complete home escape routing parameters
+            setDisplayedNews(allNews); 
             setCurrentView('home');
             window.scrollTo(0, 0);
             isInternalHistoryChange.current = true;
@@ -256,7 +251,7 @@
 
         window.addEventListener('popstate', handleHardwareBackSwipe);
         return () => window.removeEventListener('popstate', handleHardwareBackSwipe);
-      }, [selectedNews, currentView]);
+      }, [selectedNews, currentView, allNews]);
 
       const updateNewsReaderTarget = (newsItem) => {
         setSelectedNews(newsItem);
@@ -268,6 +263,10 @@
       };
 
       const updateActiveViewTarget = (viewName) => {
+        // Safe navigation catch: if tapping Home directly from tab menu, clear active filters completely
+        if (viewName === 'home') {
+          setDisplayedNews(allNews);
+        }
         setCurrentView(viewName);
         window.scrollTo(0, 0);
         isInternalHistoryChange.current = true;
@@ -275,7 +274,6 @@
         isInternalHistoryChange.current = false;
       };
 
-      // Background news polling configuration
       useEffect(() => {
         const structuralInterval = setInterval(() => {
           fetchNews(true); 
@@ -301,7 +299,7 @@
           playTone(523.25, now, 0.15); 
           playTone(659.25, now + 0.1, 0.3); 
         } catch(e) {
-          console.log("Audio contextual connection pending initialization");
+          console.log("Audio contexts pending interaction profiles");
         }
       };
 
@@ -343,11 +341,13 @@
           }
 
           setAllNews(items);
+          
+          // Guard against over-writing active filters during silent loops
           if (!isSilentPoll || currentView === 'home') {
             setDisplayedNews(items);
           }
         } catch (err) {
-          console.error("Error establishing link to feed array infrastructure:", err);
+          console.error("Error patching feeds trace elements:", err);
         } finally {
           if (!isSilentPoll) setLoading(false);
         }
@@ -362,7 +362,7 @@
               url: item.link,
             });
           } catch (err) {
-            console.log('Sharing matrix closed securely');
+            console.log('Sharing layer dismissed securely');
           }
         } else {
           window.open(item.link, '_blank');
@@ -463,7 +463,8 @@
             ),
 
             currentView === 'home' && e('div', null,
-              carouselItems.length > 0 && e('div', { id: 'newsCarousel' },
+              // Safe Guard: Only try to map carouselItems if array contains valid matching items
+              carouselItems.length > 0 ? e('div', { id: 'newsCarousel' },
                 e('div', { className: 'carousel-inner' },
                   carouselItems.map((item, idx) => {
                     const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
@@ -473,15 +474,16 @@
                     );
                   })
                 )
-              ),
+              ) : null,
+              
               e('div', { className: 'container pt-2' },
-                remainingNews.map((item, i) => {
+                remainingNews.length > 0 ? remainingNews.map((item, i) => {
                   const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
                   return e('div', { key: i, className: 'news-card', onClick: () => updateNewsReaderTarget(item) },
                     img && e('img', { src: img, className: 'w-100', style: { height: '210px', objectFit: 'cover' } }),
                     e('div', { className: 'p-3' }, e('span', { className: 'badge bg-primary mb-2 rounded-2' }, item.sourceName), e('div', { className: 'fw-bold', style: { fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: '1.45' } }, item.title))
                   );
-                })
+                }) : e('div', { className: 'text-center p-5 opacity-50 fw-bold', style: { fontFamily: "'Mukta'" } }, 'यस विधामा अहिले कुनै समाचार उपलब्ध छैन।')
               )
             )
 
