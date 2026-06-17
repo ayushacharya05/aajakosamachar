@@ -47,7 +47,7 @@
     #splashScreen img { width: 130px; animation: logoEntrance 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
     @keyframes logoEntrance { 
-      0 { transform: scale(0.85); opacity: 0; } 
+      0% { transform: scale(0.85); opacity: 0; } 
       35% { transform: scale(1); opacity: 1; } 
       75% { transform: scale(1); opacity: 1; filter: blur(0px); }
       100% { transform: scale(1.05); opacity: 0; filter: blur(4px); } 
@@ -102,6 +102,8 @@
     #categorySection { padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
     .cat-tile { background: var(--card-bg-light); border-radius: 20px; padding: 24px 12px; text-align: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.03); transition: transform 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
     .cat-tile:active { transform: scale(0.96); }
+    
+    .category-header { padding: 10px 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 
     .offcanvas { width: 280px !important; border: none !important; background-color: #fff; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
     .nav-link-custom { padding: 14px 20px; border-radius: 14px; color: inherit; text-decoration: none; display: flex; align-items: center; margin: 6px 12px; font-weight: 600; }
@@ -185,7 +187,7 @@
 
     function getTopic(title) {
       if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
-      if (/राजनीति|नेता|सरकार|संसद|मन्त्री/i.test(title)) return 'Politics'; // Fixed mix of English/Nepali character match
+      if (/राजनीति|नेता|सरकार|संसद|मन्त्री/i.test(title)) return 'Politics';
       if (/प्रविधि|मोबाइल|इन्टरनेट|इलेक्ट्रोनिक्स/i.test(title)) return 'Tech';
       if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो|सिनेमा/i.test(title)) return 'Entertainment';
       if (/बैंक|अर्थ|बजार|शेयर|पूंजी|बजेट/i.test(title)) return 'Economy';
@@ -194,7 +196,9 @@
 
     function App() {
       const [allNews, setAllNews] = useState([]);
-      const [displayedNews, setDisplayedNews] = useState([]);
+      const [displayedNews, setDisplayedNews] = useState([]); // Exclusive to general home view feeds
+      const [categoryNews, setCategoryNews] = useState([]); // Completely isolated state to map individual categories safely
+      const [activeCategoryName, setActiveCategoryName] = useState('');
       const [savedNews, setSavedNews] = useState(() => JSON.parse(localStorage.getItem('savedNews') || '[]'));
       const [currentView, setCurrentView] = useState('home');
       const [selectedNews, setSelectedNews] = useState(null);
@@ -238,9 +242,14 @@
             isInternalHistoryChange.current = true;
             window.history.pushState({ view: currentView, hasModal: false }, '');
             isInternalHistoryChange.current = false;
+          } else if (currentView === 'category_view') {
+            // Drop back cleanly to category layout grid instead of general crash
+            setCurrentView('categories');
+            window.scrollTo(0, 0);
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: 'categories', hasModal: false }, '');
+            isInternalHistoryChange.current = false;
           } else if (currentView !== 'home') {
-            // Revert filter list on complete home escape routing parameters
-            setDisplayedNews(allNews); 
             setCurrentView('home');
             window.scrollTo(0, 0);
             isInternalHistoryChange.current = true;
@@ -251,7 +260,7 @@
 
         window.addEventListener('popstate', handleHardwareBackSwipe);
         return () => window.removeEventListener('popstate', handleHardwareBackSwipe);
-      }, [selectedNews, currentView, allNews]);
+      }, [selectedNews, currentView]);
 
       const updateNewsReaderTarget = (newsItem) => {
         setSelectedNews(newsItem);
@@ -263,15 +272,21 @@
       };
 
       const updateActiveViewTarget = (viewName) => {
-        // Safe navigation catch: if tapping Home directly from tab menu, clear active filters completely
-        if (viewName === 'home') {
-          setDisplayedNews(allNews);
-        }
         setCurrentView(viewName);
         window.scrollTo(0, 0);
         isInternalHistoryChange.current = true;
         window.history.pushState({ view: viewName, hasModal: false }, '');
         isInternalHistoryChange.current = false;
+      };
+
+      const handleCategorySelection = (catId, catLabel) => {
+        setActiveCategoryName(catLabel);
+        if (catId === 'All') {
+          setCategoryNews(allNews);
+        } else {
+          setCategoryNews(allNews.filter(n => n.topic === catId));
+        }
+        updateActiveViewTarget('category_view');
       };
 
       useEffect(() => {
@@ -299,7 +314,7 @@
           playTone(523.25, now, 0.15); 
           playTone(659.25, now + 0.1, 0.3); 
         } catch(e) {
-          console.log("Audio contexts pending interaction profiles");
+          console.log("Audio parameters standby active");
         }
       };
 
@@ -341,13 +356,9 @@
           }
 
           setAllNews(items);
-          
-          // Guard against over-writing active filters during silent loops
-          if (!isSilentPoll || currentView === 'home') {
-            setDisplayedNews(items);
-          }
+          setDisplayedNews(items); // Home feed maintains pure unfiltered data loop tracking
         } catch (err) {
-          console.error("Error patching feeds trace elements:", err);
+          console.error("Error patching architectural layout data matrix:", err);
         } finally {
           if (!isSilentPoll) setLoading(false);
         }
@@ -362,7 +373,7 @@
               url: item.link,
             });
           } catch (err) {
-            console.log('Sharing layer dismissed securely');
+            console.log('Sharing profile safely saved');
           }
         } else {
           window.open(item.link, '_blank');
@@ -439,9 +450,24 @@
                 { id: 'Tech', label: 'प्रविधि', icon: 'fas fa-microchip' },
                 { id: 'Entertainment', label: 'मनोरञ्जन', icon: 'fas fa-film' },
                 { id: 'Economy', label: 'अर्थतन्त्र', icon: 'fas fa-chart-line' }
-              ].map(c => e('div', { key: c.id, className: 'cat-tile', onClick: () => { setDisplayedNews(c.id === 'All' ? allNews : allNews.filter(n => n.topic === c.id)); updateActiveViewTarget('home'); } },
+              ].map(c => e('div', { key: c.id, className: 'cat-tile', onClick: () => handleCategorySelection(c.id, c.label) },
                 e('i', { className: `${c.icon} mb-3 text-primary fs-3` }), e('br'), e('span', { className: 'fw-bold', style: { fontFamily: "'Mukta'" } }, c.label)
               ))
+            ),
+
+            // ISOLATED SPECIFIC CATEGORY TARGET VIEW LAYER
+            currentView === 'category_view' && e('div', { className: 'container pt-2' },
+              e('div', { className: 'category-header' },
+                e('button', { className: 'btn border-0 rounded-circle text-primary p-1', onClick: () => updateActiveViewTarget('categories') }, e('i', { className: 'fas fa-arrow-left fs-4' })),
+                e('h3', { style: { fontFamily: "'Mukta'", fontWeight: 800, margin: 0, fontSize: '1.4rem' } }, activeCategoryName)
+              ),
+              categoryNews.length > 0 ? categoryNews.map((item, i) => {
+                const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
+                return e('div', { key: i, className: 'news-card', onClick: () => updateNewsReaderTarget(item) },
+                  img && e('img', { src: img, className: 'w-100', style: { height: '210px', objectFit: 'cover' } }),
+                  e('div', { className: 'p-3' }, e('span', { className: 'badge bg-primary mb-2 rounded-2' }, item.sourceName), e('div', { className: 'fw-bold', style: { fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: '1.45' } }, item.title))
+                );
+              }) : e('div', { className: 'text-center p-5 opacity-50 fw-bold', style: { fontFamily: "'Mukta'" } }, 'यस विधामा अहिले कुनै समाचार उपलब्ध छैन।')
             ),
 
             currentView === 'taja' && e('div', { className: 'container pt-3' },
@@ -463,8 +489,7 @@
             ),
 
             currentView === 'home' && e('div', null,
-              // Safe Guard: Only try to map carouselItems if array contains valid matching items
-              carouselItems.length > 0 ? e('div', { id: 'newsCarousel' },
+              carouselItems.length > 0 && e('div', { id: 'newsCarousel' },
                 e('div', { className: 'carousel-inner' },
                   carouselItems.map((item, idx) => {
                     const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
@@ -474,16 +499,16 @@
                     );
                   })
                 )
-              ) : null,
+              ),
               
               e('div', { className: 'container pt-2' },
-                remainingNews.length > 0 ? remainingNews.map((item, i) => {
+                remainingNews.map((item, i) => {
                   const img = item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
                   return e('div', { key: i, className: 'news-card', onClick: () => updateNewsReaderTarget(item) },
                     img && e('img', { src: img, className: 'w-100', style: { height: '210px', objectFit: 'cover' } }),
                     e('div', { className: 'p-3' }, e('span', { className: 'badge bg-primary mb-2 rounded-2' }, item.sourceName), e('div', { className: 'fw-bold', style: { fontFamily: "'Mukta'", fontSize: '1.15rem', lineHeight: '1.45' } }, item.title))
                   );
-                }) : e('div', { className: 'text-center p-5 opacity-50 fw-bold', style: { fontFamily: "'Mukta'" } }, 'यस विधामा अहिले कुनै समाचार उपलब्ध छैन।')
+                })
               )
             )
 
@@ -525,7 +550,7 @@
             { id: 'categories', label: 'विधा', icon: 'fas fa-grip-vertical' },
             { id: 'taja', label: 'ताजा', icon: 'fas fa-fire-alt' },
             { id: 'saved', label: 'सेभ', icon: 'fas fa-bookmark' }
-          ].map(t => e('button', { key: t.id, className: `nav-item ${currentView === t.id ? 'active' : ''}`, onClick: () => updateActiveViewTarget(t.id) },
+          ].map(t => e('button', { key: t.id, className: `nav-item ${currentView === t.id || (t.id === 'categories' && currentView === 'category_view') ? 'active' : ''}`, onClick: () => updateActiveViewTarget(t.id) },
             e('i', { className: t.icon }), e('span', null, t.label)
           ))
         )
