@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ne" data-theme="light">
 <head>
@@ -172,7 +171,7 @@
             gap: 30px; 
         }
 
-        /* --- PREMIUM CARDS WITH EQUAL HEIGHT & IMAGE PLACEHOLDER --- */
+        /* --- PREMIUM CARDS WITH EQUAL HEIGHT --- */
         .news-card { 
             background: var(--card-bg); 
             border-radius: 20px; 
@@ -256,7 +255,7 @@
         }
         .close-reader:hover { background: #ef4444; color: white; }
 
-        /* Custom styling to keep modal matching your dark/light theme options */
+        /* Custom styling for theme matching modal overlay */
         .custom-modal-content {
             background: var(--sidebar-bg);
             color: var(--text-main);
@@ -541,11 +540,12 @@
         // Set Date
         document.getElementById('dateNow').innerText = new Date().toLocaleDateString('ne-NP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Checks user device and triggers the Bootstrap modal overlay if on mobile or tablet
+        // Accurate touch & feature detection for all modern and large mobile devices
         function checkForMobileDevice() {
-            const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
             
-            if (isMobileOrTablet) {
+            if (isMobileUA || isTouchDevice) {
                 const promptModal = new bootstrap.Modal(document.getElementById('mobilePromptModal'));
                 promptModal.show();
             }
