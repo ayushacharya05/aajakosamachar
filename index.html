@@ -172,7 +172,7 @@
             gap: 30px; 
         }
 
-        /* --- PREMIUM CARDS WITH EQUAL HEIGHT --- */
+        /* --- PREMIUM CARDS WITH EQUAL HEIGHT & IMAGE PLACEHOLDER --- */
         .news-card { 
             background: var(--card-bg); 
             border-radius: 20px; 
@@ -256,7 +256,7 @@
         }
         .close-reader:hover { background: #ef4444; color: white; }
 
-        /* Custom styling for theme matching modal overlay */
+        /* Styling for custom modal content */
         .custom-modal-content {
             background: var(--sidebar-bg);
             color: var(--text-main);
@@ -270,6 +270,14 @@
             .nav-link-custom { justify-content: center; padding: 18px; margin: 10px; }
             .nav-link-custom i { margin: 0; width: auto; font-size: 1.4rem; }
             .sidebar-header { padding: 30px 10px; text-align: center; }
+            .app-download-btn { padding: 12px 0 !important; width: 50px !important; margin: 0 auto 10px auto !important; display: flex; justify-content: center; align-items: center; }
+            .app-download-btn i { margin: 0 !important; }
+        }
+
+        @media (min-width: 1025px) {
+            .mobile-app-download {
+                display: block; /* Ensures download section stays visible in sidebar for desktops too */
+            }
         }
     </style>
 </head>
@@ -311,6 +319,12 @@
         </div>
 
         <div class="p-4 border-top border-secondary-subtle">
+            <div class="mobile-app-download">
+                <a href="https://aajakosamachar.ayushacharya5.com.np/app/download/" target="_blank" class="btn btn-success app-download-btn w-100 rounded-pill py-2 fw-bold mb-2 text-white">
+                    <i class="fab fa-android me-2"></i><span class="btn-text-hide">Download Our Android App</span>
+                </a>
+            </div>
+            
             <button class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold" onclick="toggleTheme()" id="themeBtn">
                 <i class="fas fa-moon me-2"></i> <span class="btn-text-hide">Dark Mode</span>
             </button>
@@ -341,7 +355,6 @@
         </div>
     </div>
 
-    <!-- READER OVERLAY -->
     <div id="readerOverlay" class="reader-overlay" onclick="closeReader()">
         <div class="reader-window" onclick="event.stopPropagation()">
             <button class="close-reader" onclick="closeReader()"><i class="fas fa-times"></i></button>
@@ -357,7 +370,6 @@
         </div>
     </div>
 
-    <!-- MOBILE PROMPT POPUP MODAL -->
     <div class="modal fade" id="mobilePromptModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal-content p-3 text-center">
@@ -378,7 +390,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -541,7 +552,7 @@
         // Set Date
         document.getElementById('dateNow').innerText = new Date().toLocaleDateString('ne-NP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Unconditional detection loop every single time the DOM content updates
+        // Logic to trigger the popup overlay every single time on mobile devices
         function checkForMobileDevice() {
             const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
