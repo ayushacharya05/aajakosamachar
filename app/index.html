@@ -1,0 +1,794 @@
+
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, max-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>आजको समाचार</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Mukta:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <style>
+    /* ============ DESIGN TOKENS ============
+       Palette inspired by a Nepali print masthead: warm newsprint cream,
+       deep crimson (flag red, refined), indigo dusk, and a temple-gold accent.
+       Display face: Tiro Devanagari Hindi (editorial serif, used only for the
+       masthead + lead headline). Headlines: Mukta. UI/chrome: Outfit. */
+    :root {
+      --bg: #FAF6EE;
+      --surface: #FFFFFF;
+      --surface-2: #F1EAD9;
+      --ink: #211A12;
+      --ink-muted: #847A6A;
+      --hairline: rgba(33, 26, 18, 0.12);
+      --crimson: #A31F3B;
+      --crimson-soft: rgba(163, 31, 59, 0.1);
+      --indigo: #233A5E;
+      --gold: #C0922F;
+      --gold-soft: rgba(192, 146, 47, 0.14);
+      --shadow-soft: 0 10px 28px rgba(33, 26, 18, 0.07);
+      --cat-politics: #A31F3B;
+      --cat-sports: #2E6B4E;
+      --cat-tech: #233A5E;
+      --cat-entertainment: #8C4A8A;
+      --cat-economy: #1B7A72;
+      --cat-general: #847A6A;
+    }
+    .dark-mode {
+      --bg: #15110C;
+      --surface: #1E1812;
+      --surface-2: #271F17;
+      --ink: #F1E9DA;
+      --ink-muted: #A99C87;
+      --hairline: rgba(241, 233, 218, 0.1);
+      --crimson: #E15573;
+      --crimson-soft: rgba(225, 85, 115, 0.14);
+      --indigo: #7E9AC9;
+      --gold: #E0B23D;
+      --gold-soft: rgba(224, 178, 61, 0.16);
+      --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    * { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Mukta', 'Outfit', sans-serif;
+      color: var(--ink);
+      padding-bottom: 112px;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    /* ---------- Splash ---------- */
+    #splashScreen {
+      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .splash-ring {
+      position: absolute; width: 160px; height: 160px; border-radius: 50%;
+      border: 1px solid var(--gold); opacity: 0.5; animation: ringPulse 1.6s ease-out infinite;
+    }
+    @keyframes ringPulse { 0% { transform: scale(0.7); opacity: 0.55; } 100% { transform: scale(1.5); opacity: 0; } }
+    #splashScreen img { width: 104px; position: relative; z-index: 1; animation: logoEntrance 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .splash-word { margin-top: 18px; font-family: 'Tiro Devanagari Hindi', serif; font-size: 1.5rem; color: var(--ink); opacity: 0; animation: wordFade 1.6s ease forwards 0.2s; letter-spacing: 0.02em; }
+    .splash-tag { margin-top: 4px; font-size: 0.78rem; color: var(--ink-muted); letter-spacing: 0.08em; opacity: 0; animation: wordFade 1.6s ease forwards 0.45s; }
+    @keyframes wordFade { 0% { opacity: 0; transform: translateY(6px); } 30% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes logoEntrance {
+      0% { transform: scale(0.85); opacity: 0; }
+      35% { transform: scale(1); opacity: 1; }
+      75% { transform: scale(1); opacity: 1; filter: blur(0px); }
+      100% { transform: scale(1.05); opacity: 0; filter: blur(4px); }
+    }
+
+    /* ---------- Masthead ---------- */
+    .app-header { background: var(--surface); position: sticky; top: 0; z-index: 1040; transition: background 0.3s; }
+    .masthead-row { padding: 14px 18px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .icon-btn { padding: 8px; color: var(--ink); cursor: pointer; line-height: 1; background: none; border: none; }
+    .brand-name { font-family: 'Tiro Devanagari Hindi', serif; font-weight: 400; font-size: 1.7rem; margin: 0; letter-spacing: 0.01em; }
+    .brand-name span { color: var(--crimson); }
+    .masthead-actions { display: flex; align-items: center; gap: 2px; }
+    .dateline-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 18px; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
+      font-family: 'Outfit', sans-serif; font-size: 0.68rem; letter-spacing: 0.06em; color: var(--ink-muted);
+      text-transform: uppercase;
+    }
+    .dateline-edition { display: flex; align-items: center; gap: 6px; color: var(--gold); font-weight: 600; }
+    .dateline-edition .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); display: inline-block; }
+    .search-row { overflow: hidden; max-height: 0; transition: max-height 0.25s ease, padding 0.25s ease; padding: 0 18px; }
+    .search-row.open { max-height: 60px; padding: 10px 18px; }
+    .search-input-wrap { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 14px; padding: 9px 14px; }
+    .search-input-wrap input { border: none; background: transparent; outline: none; flex-grow: 1; font-family: 'Mukta', sans-serif; font-size: 0.98rem; color: var(--ink); }
+    .search-input-wrap input::placeholder { color: var(--ink-muted); }
+
+    /* ---------- In-app notification ---------- */
+    .in-app-notification {
+      position: fixed; top: -120px; left: 16px; right: 16px;
+      background: var(--surface); border-radius: 16px; padding: 0;
+      box-shadow: var(--shadow-soft); z-index: 3000; overflow: hidden;
+      display: flex; align-items: stretch; gap: 0;
+      transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid var(--hairline); cursor: pointer;
+    }
+    .in-app-notification.show { top: 20px; }
+    .notif-bar { width: 5px; background: var(--crimson); flex-shrink: 0; }
+    .notif-body { flex-grow: 1; min-width: 0; padding: 12px 14px; }
+    .notif-title { font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 700; color: var(--crimson); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+    .notif-title .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--crimson); animation: pulseDot 1.2s ease-in-out infinite; }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+    .notif-text { font-family: 'Mukta'; font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+
+    .shimmer { background: linear-gradient(90deg, var(--surface-2) 4%, var(--hairline) 25%, var(--surface-2) 36%); background-size: 200% 100%; animation: loading-shimmer 1.5s infinite linear; }
+    @keyframes loading-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    /* ---------- Category quick chips ---------- */
+    .chip-row { display: flex; gap: 10px; padding: 14px 18px 4px; overflow-x: auto; scrollbar-width: none; }
+    .chip-row::-webkit-scrollbar { display: none; }
+    .chip { flex-shrink: 0; display: flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 100px; background: var(--surface); border: 1px solid var(--hairline); font-size: 0.85rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+    .chip .chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ---------- Hero / story bar ---------- */
+    .hero-wrap { margin: 16px 18px 6px; border-radius: 22px; overflow: hidden; position: relative; box-shadow: var(--shadow-soft); height: 320px; background: #000; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s ease; cursor: pointer; }
+    .hero-slide.active { opacity: 1; }
+    .hero-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.92) 100%); }
+    .hero-segments { position: absolute; top: 12px; left: 14px; right: 14px; display: flex; gap: 5px; z-index: 2; }
+    .hero-segment { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.3); overflow: hidden; }
+    .hero-segment-fill { height: 100%; background: #fff; width: 0%; }
+    .hero-segment-fill.filled { width: 100%; }
+    .hero-segment-fill.active { animation: segFill 4.5s linear forwards; }
+    @keyframes segFill { from { width: 0%; } to { width: 100%; } }
+    .hero-text { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 18px 20px; z-index: 2; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: var(--crimson); color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; padding: 3px 9px; border-radius: 6px; margin-bottom: 9px; text-transform: uppercase; }
+    .hero-title { font-family: 'Tiro Devanagari Hindi', serif; font-size: 1.4rem; line-height: 1.42; color: #fff; margin: 0; }
+    .hero-meta { margin-top: 8px; font-size: 0.74rem; color: rgba(255,255,255,0.75); font-family: 'Outfit'; }
+
+    /* ---------- Section label ---------- */
+    .section-label { display: flex; align-items: center; gap: 10px; padding: 22px 18px 10px; }
+    .section-label .rule { flex-grow: 1; height: 1px; background: var(--hairline); }
+    .section-label span { font-family: 'Outfit'; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; }
+
+    /* ---------- Feed rows (editorial list) ---------- */
+    .feed-list { padding: 0 18px; }
+    .news-row { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--hairline); cursor: pointer; align-items: flex-start; }
+    .news-row:last-child { border-bottom: none; }
+    .news-row-thumb { width: 92px; height: 92px; border-radius: 14px; object-fit: cover; flex-shrink: 0; background: var(--surface-2); }
+    .news-row-body { flex-grow: 1; min-width: 0; }
+    .news-row-eyebrow { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; font-family: 'Outfit'; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .news-row-eyebrow .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .news-row-eyebrow .src { color: var(--ink); }
+    .news-row-eyebrow .time { color: var(--ink-muted); font-weight: 500; margin-left: auto; flex-shrink: 0; padding-left: 8px; }
+    .news-row-title { font-family: 'Mukta'; font-weight: 600; font-size: 1.04rem; line-height: 1.45; color: var(--ink); }
+
+    /* ---------- Category directory (विधा tab) ---------- */
+    .section-directory { padding: 16px 18px; }
+    .directory-row { display: flex; align-items: center; gap: 14px; padding: 16px 4px; border-bottom: 1px solid var(--hairline); cursor: pointer; }
+    .directory-row:last-child { border-bottom: none; }
+    .directory-icon { width: 44px; height: 44px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; flex-shrink: 0; }
+    .directory-label { font-family: 'Mukta'; font-weight: 700; font-size: 1.08rem; flex-grow: 1; }
+    .directory-chevron { color: var(--ink-muted); }
+
+    .category-header { padding: 16px 18px 6px; display: flex; align-items: center; gap: 12px; }
+    .category-header h3 { font-family: 'Tiro Devanagari Hindi', serif; font-weight: 400; margin: 0; font-size: 1.5rem; }
+    .category-tag-bar { height: 4px; border-radius: 4px; margin: 0 18px 4px; }
+
+    /* ---------- Offcanvas sidebar ---------- */
+    .offcanvas { width: 280px !important; border: none !important; background-color: var(--surface) !important; box-shadow: 4px 0 24px rgba(0,0,0,0.12); color: var(--ink); }
+    .nav-link-custom { padding: 14px 18px; border-radius: 14px; color: var(--ink); text-decoration: none; display: flex; align-items: center; margin: 5px 12px; font-weight: 600; font-family: 'Mukta'; }
+    .nav-link-custom i { width: 30px; color: var(--crimson); font-size: 1.05rem; }
+
+    /* ---------- Bottom nav ---------- */
+    .bottom-nav { position: fixed; bottom: 18px; left: 18px; right: 18px; height: 70px; background: var(--surface); display: flex; justify-content: space-around; align-items: center; border-radius: 24px; box-shadow: var(--shadow-soft); z-index: 1030; border: 1px solid var(--hairline); }
+    .nav-item { color: var(--ink-muted); text-decoration: none; display: flex; flex-direction: column; align-items: center; flex: 1; border: none; background: none; transition: color 0.2s; padding: 8px 0; position: relative; }
+    .nav-item.active { color: var(--crimson); }
+    .nav-item.active::before { content: ''; position: absolute; top: 0; width: 4px; height: 4px; border-radius: 50%; background: var(--crimson); }
+    .nav-item i { font-size: 1.18rem; margin-bottom: 4px; }
+    .nav-item span { font-size: 0.72rem; font-weight: 700; font-family: 'Mukta'; }
+
+    /* ---------- Reader ---------- */
+    #newsReader { position: fixed; inset: 0; background: var(--surface); z-index: 2000; overflow-y: auto; display: flex; flex-direction: column; }
+    .reader-progress { position: sticky; top: 0; height: 3px; background: var(--hairline); z-index: 2002; }
+    .reader-progress-fill { height: 100%; background: var(--crimson); width: 0%; transition: width 0.1s linear; }
+    .reader-header { position: sticky; top: 3px; background: var(--surface); padding: 12px 16px; display: flex; align-items: center; border-bottom: 1px solid var(--hairline); z-index: 2001; gap: 4px; }
+    .reader-source { font-family: 'Outfit'; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .font-size-toggle { display: flex; align-items: center; gap: 2px; background: var(--surface-2); border-radius: 10px; padding: 2px; }
+    .font-size-toggle button { border: none; background: none; padding: 6px 9px; border-radius: 8px; color: var(--ink-muted); font-family: 'Outfit'; font-weight: 700; }
+    .font-size-toggle button.active { background: var(--surface); color: var(--crimson); }
+    .reader-body { padding: 22px 20px 10px; flex-grow: 1; }
+    .reader-meta { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 16px; display: flex; gap: 15px; font-family: 'Outfit'; }
+    .reader-headline { font-family: 'Tiro Devanagari Hindi', serif; font-weight: 400; margin-bottom: 14px; font-size: 1.6rem; line-height: 1.42; }
+    .reader-content { font-family: 'Mukta'; line-height: 1.9; white-space: pre-wrap; color: var(--ink); }
+    .source-link-btn { background: var(--crimson); border: none; color: #fff; width: 100%; margin-top: 36px; padding: 15px; border-radius: 100px; font-weight: 700; font-family: 'Mukta'; font-size: 1rem; }
+
+    .empty-state { text-align: center; padding: 70px 30px; color: var(--ink-muted); }
+    .empty-state i { font-size: 2.2rem; margin-bottom: 14px; display: block; color: var(--hairline); }
+    .empty-state span { font-family: 'Mukta'; font-weight: 700; font-size: 1.05rem; }
+  </style>
+</head>
+<body>
+
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const e = React.createElement;
+    const { useState, useEffect, useRef } = React;
+
+    const FEEDS = [
+      { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
+      { name: "Setopati", url: "https://setopati.com/feed" },
+      { name: "Ratopati", url: "https://www.ratopati.com/feed" },
+      { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
+      { name: "TechPana", url: "https://www.techpana.com/feed" },
+      { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
+      { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
+      { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
+      { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
+      { name: "Nepal News", url: "https://nepalnews.com/rss" },
+      { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
+      { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
+      { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
+      { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
+      { name: "ICT frame", url: "https://np.ictframe.com/rss" },
+      { name: "Technology Khabar", url: "https://www.technologykhabar.com/rss" },
+      { name: "News filmy", url: "https://newsfilmy.com/rss" },
+      { name: "Nepali Paisa", url: "https://nepalipaisa.com/rss" },
+      { name: "Ramailo Cha", url: "https://www.ramailo6.com/rss" },
+      { name: "Bizmandu", url: "https://bizmandu.com/rss" },
+      { name: "Baahrakhari", url: "https://baahrakhari.com/feed" }
+    ];
+
+    const CATEGORY_META = {
+      Politics: { label: 'राजनीति', color: 'var(--cat-politics)', icon: 'fas fa-landmark' },
+      Sports: { label: 'खेलकुद', color: 'var(--cat-sports)', icon: 'fas fa-trophy' },
+      Tech: { label: 'प्रविधि', color: 'var(--cat-tech)', icon: 'fas fa-microchip' },
+      Entertainment: { label: 'मनोरञ्जन', color: 'var(--cat-entertainment)', icon: 'fas fa-film' },
+      Economy: { label: 'अर्थतन्त्र', color: 'var(--cat-economy)', icon: 'fas fa-chart-line' },
+      General: { label: 'मुख्य', color: 'var(--cat-general)', icon: 'fas fa-newspaper' }
+    };
+    const CATEGORY_ORDER = ['Politics', 'Sports', 'Tech', 'Entertainment', 'Economy'];
+
+    const NEPALI_DIGITS = '०१२३४५६७८९';
+    function toNepaliDigits(input) { return String(input).replace(/[0-9]/g, d => NEPALI_DIGITS[d]); }
+
+    const NEPALI_WEEKDAYS = ['आइतबार', 'सोमबार', 'मंगलबार', 'बुधबार', 'बिहीबार', 'शुक्रबार', 'शनिबार'];
+    const NEPALI_MONTHS = ['जनवरी', 'फेब्रुअरी', 'मार्च', 'अप्रिल', 'मे', 'जुन', 'जुलाई', 'अगस्ट', 'सेप्टेम्बर', 'अक्टोबर', 'नोभेम्बर', 'डिसेम्बर'];
+
+    function getDatelineString() {
+      const now = new Date();
+      return `${NEPALI_WEEKDAYS[now.getDay()]}, ${toNepaliDigits(now.getDate())} ${NEPALI_MONTHS[now.getMonth()]} ${toNepaliDigits(now.getFullYear())}`;
+    }
+
+    function getRelativeTimeNepali(pubDate) {
+      if (!pubDate) return '';
+      const diffMs = Date.now() - new Date(pubDate).getTime();
+      if (isNaN(diffMs)) return '';
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return 'अहिले';
+      if (diffMin < 60) return `${toNepaliDigits(diffMin)} मि. अघि`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${toNepaliDigits(diffHr)} घ. अघि`;
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffDay === 1) return 'हिजो';
+      if (diffDay < 7) return `${toNepaliDigits(diffDay)} दिन अघि`;
+      return new Date(pubDate).toLocaleDateString('ne-NP');
+    }
+
+    function cleanSourceName(name) {
+      if (!name) return 'समाचार';
+      const n = name.toLowerCase();
+      if (n.includes('onlinekhabar')) return 'अनलाइनखबर';
+      if (n.includes('setopati')) return 'सेतोपाटी';
+      if (n.includes('ratopati')) return 'रातोपाटी';
+      if (n.includes('nepalkhabar')) return 'नेपालखबर';
+      if (n.includes('ourbiratnagar') || n.includes('biratnagar')) return 'हाम्रो विराटनगर';
+      if (n.includes('kantipur')) return 'कान्तिपुर';
+      let parts = name.split(' ');
+      return parts.length > 1 ? parts[0] + ' ' + parts[1] : parts[0];
+    }
+
+    function getTopic(title) {
+      if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
+      if (/राजनीति|नेता|सरकार|संसद|मन्त्री/i.test(title)) return 'Politics';
+      if (/प्रविधि|मोबाइल|इन्टरनेट|इलेक्ट्रोनिक्स/i.test(title)) return 'Tech';
+      if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो|सिनेमा/i.test(title)) return 'Entertainment';
+      if (/बैंक|अर्थ|बजार|शेयर|पूंजी|बजेट/i.test(title)) return 'Economy';
+      return 'General';
+    }
+
+    function getImageFor(item) {
+      return item.thumbnail || item.enclosure?.link || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
+    }
+
+    function App() {
+      const [allNews, setAllNews] = useState([]);
+      const [displayedNews, setDisplayedNews] = useState([]);
+      const [categoryNews, setCategoryNews] = useState([]);
+      const [activeCategoryId, setActiveCategoryId] = useState('All');
+      const [activeCategoryName, setActiveCategoryName] = useState('');
+      const [savedNews, setSavedNews] = useState(() => JSON.parse(localStorage.getItem('savedNews') || '[]'));
+      const [currentView, setCurrentView] = useState('home');
+      const [selectedNews, setSelectedNews] = useState(null);
+      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+      const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+      const [loading, setLoading] = useState(true);
+      const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('hasSeenSplash'));
+      const [carouselIndex, setCarouselIndex] = useState(0);
+      const [readerFontScale, setReaderFontScale] = useState(() => localStorage.getItem('readerFontScale') || 'medium');
+      const [readerProgress, setReaderProgress] = useState(0);
+
+      const [searchOpen, setSearchOpen] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+
+      const [activeNotification, setActiveNotification] = useState(null);
+      const [showNotifBanner, setShowNotifBanner] = useState(false);
+      const lastTrackedLink = useRef(localStorage.getItem('lastTrackedLink') || '');
+
+      const isInternalHistoryChange = useRef(false);
+      const readerBodyRef = useRef(null);
+
+      useEffect(() => {
+        document.body.classList.toggle('dark-mode', darkMode);
+        localStorage.setItem('darkMode', darkMode);
+      }, [darkMode]);
+
+      useEffect(() => {
+        localStorage.setItem('readerFontScale', readerFontScale);
+      }, [readerFontScale]);
+
+      useEffect(() => {
+        if (showSplash) {
+          const t = setTimeout(() => {
+            setShowSplash(false);
+            sessionStorage.setItem('hasSeenSplash', 'true');
+            window.history.pushState({ view: 'home', hasModal: false }, '');
+            fetchNews();
+          }, 1600);
+          return () => clearTimeout(t);
+        } else {
+          fetchNews();
+        }
+      }, [showSplash]);
+
+      useEffect(() => {
+        const handleHardwareBackSwipe = (event) => {
+          if (isInternalHistoryChange.current) return;
+
+          if (searchOpen) {
+            setSearchOpen(false);
+            setSearchQuery('');
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: currentView, hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          } else if (selectedNews) {
+            setSelectedNews(null);
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: currentView, hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          } else if (currentView === 'category_view') {
+            setCurrentView('categories');
+            window.scrollTo(0, 0);
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: 'categories', hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          } else if (currentView !== 'home') {
+            setCurrentView('home');
+            window.scrollTo(0, 0);
+            isInternalHistoryChange.current = true;
+            window.history.pushState({ view: 'home', hasModal: false }, '');
+            isInternalHistoryChange.current = false;
+          }
+        };
+
+        window.addEventListener('popstate', handleHardwareBackSwipe);
+        return () => window.removeEventListener('popstate', handleHardwareBackSwipe);
+      }, [selectedNews, currentView, searchOpen]);
+
+      const updateNewsReaderTarget = (newsItem) => {
+        setSelectedNews(newsItem);
+        setReaderProgress(0);
+        if (newsItem) {
+          isInternalHistoryChange.current = true;
+          window.history.pushState({ view: currentView, hasModal: true }, '');
+          isInternalHistoryChange.current = false;
+        }
+      };
+
+      const updateActiveViewTarget = (viewName) => {
+        setCurrentView(viewName);
+        setSearchOpen(false);
+        setSearchQuery('');
+        window.scrollTo(0, 0);
+        isInternalHistoryChange.current = true;
+        window.history.pushState({ view: viewName, hasModal: false }, '');
+        isInternalHistoryChange.current = false;
+      };
+
+      const handleCategorySelection = (catId, catLabel) => {
+        setActiveCategoryId(catId);
+        setActiveCategoryName(catLabel);
+        if (catId === 'All') {
+          setCategoryNews(allNews);
+        } else {
+          setCategoryNews(allNews.filter(n => n.topic === catId));
+        }
+        updateActiveViewTarget('category_view');
+      };
+
+      const toggleSearch = () => {
+        const next = !searchOpen;
+        setSearchOpen(next);
+        if (!next) setSearchQuery('');
+        isInternalHistoryChange.current = true;
+        window.history.pushState({ view: currentView, hasModal: next }, '');
+        isInternalHistoryChange.current = false;
+      };
+
+      useEffect(() => {
+        const structuralInterval = setInterval(() => {
+          fetchNews(true);
+        }, 60000);
+        return () => clearInterval(structuralInterval);
+      }, [allNews]);
+
+      const playNotificationSound = () => {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const playTone = (freq, startTime, duration) => {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, startTime);
+            gainNode.gain.setValueAtTime(0.1, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+          };
+          const now = audioCtx.currentTime;
+          playTone(523.25, now, 0.15);
+          playTone(659.25, now + 0.1, 0.3);
+        } catch (e) {
+          console.log("Audio parameters standby active");
+        }
+      };
+
+      const triggerInAppAlert = (newsItem) => {
+        setActiveNotification(newsItem);
+        setShowNotifBanner(true);
+        playNotificationSound();
+        setTimeout(() => {
+          setShowNotifBanner(false);
+        }, 6000);
+      };
+
+      const fetchNews = async (isSilentPoll = false) => {
+        if (!isSilentPoll) setLoading(true);
+        try {
+          const results = await Promise.allSettled(
+            FEEDS.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json()))
+          );
+
+          const items = results
+            .filter(r => r.status === 'fulfilled' && r.value && r.value.items)
+            .flatMap(r => {
+              const data = r.value;
+              return data.items.map(item => ({
+                ...item,
+                sourceName: cleanSourceName(data.feed.title || data.feed.name),
+                topic: getTopic(item.title)
+              }));
+            });
+
+          items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+          if (items.length > 0) {
+            if (lastTrackedLink.current && lastTrackedLink.current !== items[0].link) {
+              triggerInAppAlert(items[0]);
+            }
+            lastTrackedLink.current = items[0].link;
+            localStorage.setItem('lastTrackedLink', items[0].link);
+          }
+
+          setAllNews(items);
+          setDisplayedNews(items);
+        } catch (err) {
+          console.error("Error patching architectural layout data matrix:", err);
+        } finally {
+          if (!isSilentPoll) setLoading(false);
+        }
+      };
+
+      const handleShare = async (item) => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: item.title,
+              text: item.sourceName + " - आजको समाचार",
+              url: item.link,
+            });
+          } catch (err) {
+            console.log('Sharing profile safely saved');
+          }
+        } else {
+          window.open(item.link, '_blank');
+        }
+      };
+
+      const toggleSaved = (item) => {
+        let updated = savedNews.some(n => n.link === item.link) ? savedNews.filter(n => n.link !== item.link) : [...savedNews, item];
+        setSavedNews(updated);
+        localStorage.setItem('savedNews', JSON.stringify(updated));
+      };
+
+      const heroItems = displayedNews.filter(n => getImageFor(n)).slice(0, 5);
+      const remainingNews = displayedNews.slice(5);
+
+      useEffect(() => {
+        if (heroItems.length === 0) return;
+        const interval = setInterval(() => {
+          setCarouselIndex((prev) => (prev + 1) % heroItems.length);
+        }, 4500);
+        return () => clearInterval(interval);
+      }, [heroItems.length]);
+
+      const handleReaderScroll = () => {
+        const el = readerBodyRef.current;
+        if (!el) return;
+        const max = el.scrollHeight - el.clientHeight;
+        setReaderProgress(max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0);
+      };
+
+      const searchResults = searchQuery.trim()
+        ? allNews.filter(n => n.title && n.title.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+        : [];
+
+      const renderShimmerLoader = () => (
+        e('div', { className: 'container pt-3 px-3' },
+          e('div', { className: 'shimmer rounded-4 mb-3', style: { height: '300px', width: '100%' } }),
+          [1, 2, 3].map(n => e('div', { key: n, className: 'd-flex gap-3 mb-4' },
+            e('div', { className: 'shimmer rounded-4', style: { height: '92px', width: '92px', flexShrink: 0 } }),
+            e('div', { className: 'flex-grow-1 d-flex flex-column gap-2 justify-content-center' },
+              e('div', { className: 'shimmer rounded-1', style: { height: '11px', width: '40%' } }),
+              e('div', { className: 'shimmer rounded-1', style: { height: '18px', width: '95%' } }),
+              e('div', { className: 'shimmer rounded-1', style: { height: '18px', width: '70%' } })
+            )
+          ))
+        )
+      );
+
+      const renderNewsRow = (item, key) => {
+        const img = getImageFor(item);
+        const meta = CATEGORY_META[item.topic] || CATEGORY_META.General;
+        return e('div', { key, className: 'news-row', onClick: () => updateNewsReaderTarget(item) },
+          img && e('img', { src: img, className: 'news-row-thumb', loading: 'lazy' }),
+          e('div', { className: 'news-row-body' },
+            e('div', { className: 'news-row-eyebrow' },
+              e('span', { className: 'cat-dot', style: { background: meta.color } }),
+              e('span', { className: 'src' }, item.sourceName),
+              e('span', { className: 'time' }, getRelativeTimeNepali(item.pubDate))
+            ),
+            e('div', { className: 'news-row-title' }, item.title)
+          )
+        );
+      };
+
+      const renderEmptyState = (icon, text) => (
+        e('div', { className: 'empty-state' }, e('i', { className: icon }), e('span', null, text))
+      );
+
+      if (showSplash) {
+        return e('div', { id: 'splashScreen' },
+          e('div', { className: 'splash-ring' }),
+          e('img', { src: 'https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png', alt: 'Logo' }),
+          e('div', { className: 'splash-word' }, 'आजको समाचार'),
+          e('div', { className: 'splash-tag' }, 'तपाईंको दैनिक डिजिटल पत्रिका')
+        );
+      }
+
+      const readerFontPx = { small: '1.05rem', medium: '1.2rem', large: '1.38rem' }[readerFontScale];
+
+      return e('div', null,
+        e('div', {
+          className: `in-app-notification ${showNotifBanner ? 'show' : ''}`,
+          onClick: () => { updateNewsReaderTarget(activeNotification); setShowNotifBanner(false); }
+        },
+          e('div', { className: 'notif-bar' }),
+          e('div', { className: 'notif-body' },
+            e('div', { className: 'notif-title' }, e('span', { className: 'pulse-dot' }), activeNotification ? `ब्रेकिंग · ${activeNotification.sourceName}` : ''),
+            e('p', { className: 'notif-text' }, activeNotification ? activeNotification.title : '')
+          )
+        ),
+
+        e('header', { className: 'app-header' },
+          e('div', { className: 'masthead-row' },
+            e('button', { className: 'icon-btn', onClick: () => setIsSidebarOpen(true) }, e('i', { className: 'fas fa-bars-staggered fa-lg' })),
+            e('h1', { className: 'brand-name' }, 'आजको ', e('span', null, 'समाचार')),
+            e('div', { className: 'masthead-actions' },
+              e('button', { className: 'icon-btn', onClick: toggleSearch }, e('i', { className: `fas ${searchOpen ? 'fa-xmark' : 'fa-magnifying-glass'} fa-lg` })),
+              e('button', { className: 'icon-btn', onClick: () => setDarkMode(!darkMode) }, e('i', { className: `fas ${darkMode ? 'fa-sun' : 'fa-moon'} fa-lg` }))
+            )
+          ),
+          e('div', { className: `search-row ${searchOpen ? 'open' : ''}` },
+            e('div', { className: 'search-input-wrap' },
+              e('i', { className: 'fas fa-magnifying-glass', style: { color: 'var(--ink-muted)' } }),
+              e('input', {
+                type: 'text', placeholder: 'समाचार खोज्नुहोस्...', value: searchQuery,
+                autoFocus: searchOpen,
+                onChange: (ev) => setSearchQuery(ev.target.value)
+              }),
+              searchQuery && e('i', { className: 'fas fa-circle-xmark', style: { color: 'var(--ink-muted)', cursor: 'pointer' }, onClick: () => setSearchQuery('') })
+            )
+          ),
+          !searchOpen && e('div', { className: 'dateline-bar' },
+            e('span', null, getDatelineString()),
+            e('span', { className: 'dateline-edition' }, e('span', { className: 'dot' }), 'मोबाइल संस्करण')
+          )
+        ),
+
+        e('div', null,
+          isSidebarOpen && e('div', { className: 'offcanvas-backdrop fade show', onClick: () => setIsSidebarOpen(false) }),
+          e('div', { className: `offcanvas offcanvas-start ${isSidebarOpen ? 'show' : ''}`, style: { visibility: isSidebarOpen ? 'visible' : 'hidden', transition: 'transform 0.25s ease-out' } },
+            e('div', { className: 'offcanvas-header border-bottom px-4', style: { borderColor: 'var(--hairline)' } },
+              e('h5', { className: 'brand-name', style: { fontSize: '1.3rem' } }, 'मेनु'),
+              e('button', { type: 'button', className: 'btn-close shadow-none', onClick: () => setIsSidebarOpen(false) })
+            ),
+            e('div', { className: 'offcanvas-body p-0 pt-3' },
+              e('a', { href: 'https://aajakosamachar.ayushacharya5.com.np/app/about.html', className: 'nav-link-custom' }, e('i', { className: 'fas fa-info-circle' }), ' हाम्रो बारेमा'),
+              e('a', { href: 'https://aajakosamachar.ayushacharya5.com.np/app/support.html', className: 'nav-link-custom' }, e('i', { className: 'fas fa-headset' }), ' सहयोग')
+            )
+          )
+        ),
+
+        e('main', { className: 'container-fluid p-0' },
+
+          searchOpen && searchQuery.trim() ? e('div', null,
+            e('div', { className: 'section-label' }, e('span', null, `खोज परिणाम (${toNepaliDigits(searchResults.length)})`), e('div', { className: 'rule' })),
+            searchResults.length > 0
+              ? e('div', { className: 'feed-list' }, searchResults.map((item, i) => renderNewsRow(item, i)))
+              : renderEmptyState('fas fa-magnifying-glass', '"' + searchQuery + '" सँग मिल्दो समाचार फेला परेन।')
+          ) :
+
+          loading ? renderShimmerLoader() : e('div', null,
+
+            currentView === 'categories' && e('div', { className: 'section-directory' },
+              e('div', { className: 'directory-row', onClick: () => handleCategorySelection('All', 'सबै समाचार') },
+                e('div', { className: 'directory-icon', style: { background: 'var(--ink-muted)' } }, e('i', { className: 'fas fa-th-large' })),
+                e('div', { className: 'directory-label' }, 'सबै समाचार'),
+                e('i', { className: 'fas fa-chevron-right directory-chevron' })
+              ),
+              CATEGORY_ORDER.map(catId => {
+                const meta = CATEGORY_META[catId];
+                return e('div', { key: catId, className: 'directory-row', onClick: () => handleCategorySelection(catId, meta.label) },
+                  e('div', { className: 'directory-icon', style: { background: meta.color } }, e('i', { className: meta.icon })),
+                  e('div', { className: 'directory-label' }, meta.label),
+                  e('i', { className: 'fas fa-chevron-right directory-chevron' })
+                );
+              })
+            ),
+
+            currentView === 'category_view' && e('div', null,
+              e('div', { className: 'category-header' },
+                e('button', { className: 'btn border-0 rounded-circle text-primary p-1', style: { color: 'var(--crimson)' }, onClick: () => updateActiveViewTarget('categories') }, e('i', { className: 'fas fa-arrow-left fs-4' })),
+                e('h3', null, activeCategoryName)
+              ),
+              activeCategoryId !== 'All' && e('div', { className: 'category-tag-bar', style: { background: (CATEGORY_META[activeCategoryId] || CATEGORY_META.General).color } }),
+              categoryNews.length > 0
+                ? e('div', { className: 'feed-list pt-2' }, categoryNews.map((item, i) => renderNewsRow(item, i)))
+                : renderEmptyState('fas fa-newspaper', 'यस विधामा अहिले कुनै समाचार उपलब्ध छैन।')
+            ),
+
+            currentView === 'taja' && e('div', null,
+              e('div', { className: 'section-label' }, e('span', null, 'पछिल्लो ४० समाचार'), e('div', { className: 'rule' })),
+              e('div', { className: 'feed-list' }, allNews.slice(0, 40).map((item, i) => renderNewsRow(item, i)))
+            ),
+
+            currentView === 'saved' && e('div', null,
+              savedNews.length === 0
+                ? renderEmptyState('far fa-bookmark', 'कुनै समाचार सेभ गरिएको छैन।')
+                : e('div', { className: 'feed-list pt-3' }, savedNews.map((item, i) => renderNewsRow(item, i)))
+            ),
+
+            currentView === 'home' && e('div', null,
+
+              e('div', { className: 'chip-row' },
+                e('div', { className: 'chip', onClick: () => handleCategorySelection('All', 'सबै समाचार') },
+                  e('span', { className: 'chip-dot', style: { background: 'var(--ink-muted)' } }), 'सबै'
+                ),
+                CATEGORY_ORDER.map(catId => {
+                  const meta = CATEGORY_META[catId];
+                  return e('div', { key: catId, className: 'chip', onClick: () => handleCategorySelection(catId, meta.label) },
+                    e('span', { className: 'chip-dot', style: { background: meta.color } }), meta.label
+                  );
+                })
+              ),
+
+              heroItems.length > 0 && e('div', { className: 'hero-wrap' },
+                e('div', { className: 'hero-segments' },
+                  heroItems.map((_, idx) => e('div', { key: idx, className: 'hero-segment' },
+                    e('div', { className: `hero-segment-fill ${idx < carouselIndex ? 'filled' : ''} ${idx === carouselIndex ? 'active' : ''}`, key: idx === carouselIndex ? 'active-' + carouselIndex : 'idle-' + idx })
+                  ))
+                ),
+                heroItems.map((item, idx) => {
+                  const img = getImageFor(item);
+                  const meta = CATEGORY_META[item.topic] || CATEGORY_META.General;
+                  return e('div', { key: idx, className: `hero-slide ${idx === carouselIndex ? 'active' : ''}`, onClick: () => updateNewsReaderTarget(item) },
+                    e('img', { src: img }),
+                    e('div', { className: 'hero-gradient' }),
+                    e('div', { className: 'hero-text' },
+                      e('span', { className: 'hero-eyebrow', style: { background: meta.color } }, meta.label),
+                      e('h2', { className: 'hero-title' }, item.title),
+                      e('div', { className: 'hero-meta' }, item.sourceName, ' · ', getRelativeTimeNepali(item.pubDate))
+                    )
+                  );
+                })
+              ),
+
+              e('div', { className: 'section-label' }, e('span', null, 'थप समाचार'), e('div', { className: 'rule' })),
+              e('div', { className: 'feed-list' }, remainingNews.map((item, i) => renderNewsRow(item, i)))
+            )
+          )
+        ),
+
+        selectedNews && (() => {
+          const img = getImageFor(selectedNews);
+          const isSaved = savedNews.some(n => n.link === selectedNews.link);
+          const doc = new DOMParser().parseFromString(selectedNews.content || selectedNews.description || "", 'text/html');
+          const bodyTxt = doc.body.textContent || doc.body.innerText || "";
+
+          return e('div', { id: 'newsReader' },
+            e('div', { className: 'reader-progress' }, e('div', { className: 'reader-progress-fill', style: { width: readerProgress + '%' } })),
+            e('div', { className: 'reader-header' },
+              e('button', { className: 'btn border-0 rounded-circle me-1', onClick: () => window.history.back() }, e('i', { className: 'fas fa-arrow-left fs-5' })),
+              e('span', { className: 'reader-source flex-grow-1' }, selectedNews.sourceName),
+              e('div', { className: 'font-size-toggle' },
+                e('button', { className: readerFontScale === 'small' ? 'active' : '', onClick: () => setReaderFontScale('small') }, 'अ'),
+                e('button', { className: readerFontScale === 'medium' ? 'active' : '', style: { fontSize: '1.1em' }, onClick: () => setReaderFontScale('medium') }, 'अ'),
+                e('button', { className: readerFontScale === 'large' ? 'active' : '', style: { fontSize: '1.25em' }, onClick: () => setReaderFontScale('large') }, 'अ')
+              ),
+              e('button', { className: 'btn border-0 ms-1', onClick: () => handleShare(selectedNews) }, e('i', { className: 'fas fa-share-nodes fs-5' })),
+              e('button', { className: 'btn border-0', onClick: () => toggleSaved(selectedNews) }, e('i', { className: `${isSaved ? 'fas' : 'far'} fa-bookmark fs-5`, style: isSaved ? { color: 'var(--crimson)' } : {} }))
+            ),
+            e('div', { className: 'reader-body', ref: readerBodyRef, onScroll: handleReaderScroll },
+              e('h2', { className: 'reader-headline' }, selectedNews.title),
+              e('div', { className: 'reader-meta' },
+                e('span', null, e('i', { className: 'far fa-calendar me-1' }), selectedNews.pubDate ? new Date(selectedNews.pubDate).toLocaleDateString('ne-NP') : ''),
+                e('span', null, e('i', { className: 'far fa-clock me-1' }), getRelativeTimeNepali(selectedNews.pubDate))
+              ),
+              img && e('img', { className: 'w-100 rounded-4 mb-4', src: img, style: { maxHeight: '300px', objectFit: 'cover' } }),
+              e('div', { className: 'reader-content', style: { fontSize: readerFontPx } }, bodyTxt),
+              e('a', { href: selectedNews.link, target: '_blank', rel: 'noreferrer', className: 'source-link-btn d-block text-center text-decoration-none' }, 'पूरा स्रोतमा हेर्नुहोस्')
+            )
+          );
+        })(),
+
+        e('nav', { className: 'bottom-nav' },
+          [
+            { id: 'home', label: 'होम', icon: 'fas fa-house' },
+            { id: 'categories', label: 'विधा', icon: 'fas fa-grip-vertical' },
+            { id: 'taja', label: 'ताजा', icon: 'fas fa-fire-alt' },
+            { id: 'saved', label: 'सेभ', icon: 'fas fa-bookmark' }
+          ].map(t => e('button', { key: t.id, className: `nav-item ${currentView === t.id || (t.id === 'categories' && currentView === 'category_view') ? 'active' : ''}`, onClick: () => updateActiveViewTarget(t.id) },
+            e('i', { className: t.icon }), e('span', null, t.label)
+          ))
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(e(App));
+  </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a13f986ccc0cc6af',t:'MTc4Mjg0NzkzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"b20fbb14051e4dad99d13f71779b4a7c","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
